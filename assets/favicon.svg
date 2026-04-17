@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ARTOOLS">
+  <rect width="32" height="32" rx="8" fill="#0A0A0A"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" fill="none" stroke="#E0E0DA" stroke-opacity="0.2" stroke-width="1"/>
+  <!-- Diamante / precis?o (eco da caneta e do “zero toler?ncia”) -->
+  <path fill="#FFFFFF" d="M16 6.5l8.5 8.5-8.5 8.5-8.5-8.5z"/>
+</svg>
