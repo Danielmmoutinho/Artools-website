@@ -13,22 +13,21 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Iconify -->
-    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" defer></script>
 
     <style>
         /* Design Tokens baseados no design_system6.html */
         :root {
             --color-bg: #FFFFFF;
             --color-text: #1C1C1C;
-            --color-text-muted: #9B9B9B;
+            --color-text-secondary: #6B6B6B;
             --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --font-mono: 'Space Mono', 'Courier New', monospace;
             --radius-full: 9999px;
             --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-            --shadow-glow: 0 0 40px rgba(28,28,28,0.12);
             --shadow-btn: 0 4px 16px rgba(0,0,0,0.4);
         }
 
@@ -937,13 +936,14 @@
         <div class="hero-sticky" id="hero-section">
             
             <!-- Video Background - Scrub Effect -->
-            <video 
-                id="hero-video" 
-                class="hero-video" 
-                src="assets/videos/MeuVideo.mp4" 
-                muted 
-                playsinline 
-                preload="auto">
+            <video
+                id="hero-video"
+                class="hero-video"
+                src="assets/videos/MeuVideo.mp4"
+                muted
+                playsinline
+                preload="auto"
+                fetchpriority="high">
             </video>
             
             <!-- Overlay escuro esquerdo para leitura -->
@@ -1030,7 +1030,7 @@
                 <div class="relative feature-anim-scale subtle-float">
                     <div class="glow-node"></div>
                     <div class="feature-image-wrapper">
-                        <img src="assets/images/tech_pen.png" alt="Engenharia da Caneta">
+                        <img src="assets/images/tech_pen.png" alt="Engenharia da Caneta" loading="lazy" decoding="async">
                     </div>
                 </div>
 
@@ -1073,7 +1073,7 @@
             
             <!-- Panel 1 -->
             <div class="gallery-panel" style="background: #050505;">
-                <img src="assets/images/gallery_blueprint.png" class="gallery-bg-img" alt="Gallery Blueprint">
+                <img src="assets/images/gallery_blueprint.png" class="gallery-bg-img" alt="Gallery Blueprint" loading="lazy" decoding="async">
                 <div class="gallery-content">
                     <h2 class="gallery-title gallery-anim">A Base da Criação</h2>
                     <p class="gallery-desc gallery-anim">Toda grande estrutura começa com um rascunho perfeito. O fluxo constante de tinta adaptativa permite que grandes mentes projetem sem interrupções sob qualquer inclinação.</p>
@@ -1082,7 +1082,7 @@
 
             <!-- Panel 2 -->
             <div class="gallery-panel" style="background: #020202;">
-                <img src="assets/images/gallery_notebook.png" class="gallery-bg-img" alt="Gallery Notebook">
+                <img src="assets/images/gallery_notebook.png" class="gallery-bg-img" alt="Gallery Notebook" loading="lazy" decoding="async">
                 <div class="gallery-content">
                     <h2 class="gallery-title gallery-anim">Herança Viva</h2>
                     <p class="gallery-desc gallery-anim">Um instrumento desenhado para transcender gerações. A química perfeita entre o peso da liga aeroespacial e a fluidez analógica em mãos exigentes.</p>
@@ -1091,7 +1091,7 @@
 
             <!-- Panel 3 -->
             <div class="gallery-panel" style="background: #0A0A0A;">
-                <img src="assets/images/gallery_tip.png" class="gallery-bg-img" alt="Gallery Tip">
+                <img src="assets/images/gallery_tip.png" class="gallery-bg-img" alt="Gallery Tip" loading="lazy" decoding="async">
                 <div class="gallery-content">
                     <h2 class="gallery-title gallery-anim">Mestria do Fluxo</h2>
                     <p class="gallery-desc gallery-anim">Com o inovador canal de tungstênio, a ARTOOLS garante o fim da gravidade. Escrita fluida, milimetrada e inabalável que nunca falha, sob nenhuma pressão.</p>
@@ -1104,7 +1104,7 @@
     <!-- SEÇÃO 4: CTA FINAL C/ Glow Beam -->
     <section class="cta-section" id="cta-final">
         <!-- Background Video -->
-        <video class="cta-video-bg" autoplay muted loop playsinline>
+        <video class="cta-video-bg" autoplay muted loop playsinline preload="metadata">
             <source src="assets/videos/MeuVideo.mp4" type="video/mp4">
         </video>
         
@@ -1136,47 +1136,63 @@
         document.addEventListener("DOMContentLoaded", () => {
             gsap.registerPlugin(ScrollTrigger);
 
-            // 1. Cursor Customizado (Animação Suave)
-            const cursor = document.getElementById('cursor');
-            if (window.matchMedia("(pointer: fine)").matches) {
-                let mouseX = window.innerWidth / 2;
-                let mouseY = window.innerHeight / 2;
-                let cursorX = mouseX;
-                let cursorY = mouseY;
-                
-                // Cursor interpolação 1D via GSAP Ticker
-                gsap.ticker.add(() => {
-                    cursorX += (mouseX - cursorX) * 0.15;
-                    cursorY += (mouseY - cursorY) * 0.15;
-                    if(cursor) {
-                        cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
-                    }
-                });
-
-                window.addEventListener('mousemove', (e) => {
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
-                });
-
-                // Efeito Hover em elementos clicáveis
-                const hoverElements = document.querySelectorAll('.cursor-hover, a, button');
-                hoverElements.forEach(el => {
-                    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-                    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
-                });
-            }
-
-            // 2. Lenis Smooth Scroll (desktop); mobile usa scroll nativo (melhor com pin/horizontal + iOS)
+            const el = {
+                nav: document.getElementById("navbar"),
+                cursor: document.getElementById("cursor"),
+                video: document.getElementById("hero-video"),
+                track: document.getElementById("hero-track"),
+                heroSection: document.getElementById("hero-section"),
+                features: document.getElementById("features"),
+                galleryWrapper: document.getElementById("gallery-wrapper")
+            };
             const mqMobile = window.matchMedia("(max-width: 768px)");
             const isLenisOff = () => mqMobile.matches;
 
             const updateNavFromScroll = (scrollY) => {
-                const nav = document.getElementById('navbar');
-                if (nav) {
-                    if (scrollY > 50) nav.classList.add('scrolled');
-                    else nav.classList.remove('scrolled');
-                }
+                if (!el.nav) return;
+                el.nav.classList.toggle("scrolled", scrollY > 50);
             };
+
+            if (window.matchMedia("(pointer: fine)").matches && el.cursor) {
+                const c = el.cursor;
+                let mouseX = innerWidth / 2;
+                let mouseY = innerHeight / 2;
+                let cursorX = mouseX;
+                let cursorY = mouseY;
+                const hoverable = (t) => t && t.closest && t.closest(".cursor-hover, a, button");
+
+                gsap.ticker.add(() => {
+                    cursorX += (mouseX - cursorX) * 0.15;
+                    cursorY += (mouseY - cursorY) * 0.15;
+                    c.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+                });
+
+                addEventListener(
+                    "mousemove",
+                    (e) => {
+                        mouseX = e.clientX;
+                        mouseY = e.clientY;
+                    },
+                    { passive: true }
+                );
+
+                addEventListener(
+                    "pointerover",
+                    (e) => {
+                        if (e.pointerType !== "mouse") return;
+                        if (hoverable(e.target)) c.classList.add("hover");
+                    },
+                    true
+                );
+                addEventListener(
+                    "pointerout",
+                    (e) => {
+                        if (e.pointerType !== "mouse") return;
+                        if (!hoverable(e.relatedTarget)) c.classList.remove("hover");
+                    },
+                    true
+                );
+            }
 
             let lenis = null;
 
@@ -1184,13 +1200,10 @@
                 lenis = new Lenis({
                     duration: 1.2,
                     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                    smooth: true,
+                    smooth: true
                 });
 
-                // Integração oficial Lenis + GSAP: sem scrollerProxy (o proxy com Lenis desincroniza pin/spacer do DOM → “buraco” preto).
-                lenis.on("scroll", () => {
-                    updateNavFromScroll(lenis.scroll);
-                });
+                lenis.on("scroll", () => updateNavFromScroll(lenis.scroll));
 
                 gsap.ticker.add((time) => {
                     lenis.raf(time * 1000);
@@ -1201,7 +1214,7 @@
                     ScrollTrigger.update();
                     updateNavFromScroll(window.scrollY || window.pageYOffset);
                 };
-                window.addEventListener('scroll', onNativeScroll, { passive: true });
+                addEventListener("scroll", onNativeScroll, { passive: true });
                 onNativeScroll();
             }
             gsap.ticker.lagSmoothing(0);
@@ -1214,18 +1227,16 @@
                     ScrollTrigger.refresh();
                 }, 200);
             };
-            window.addEventListener('resize', scheduleStRefresh);
-            window.addEventListener('orientationchange', () => {
+            addEventListener("resize", scheduleStRefresh);
+            addEventListener("orientationchange", () => {
                 setTimeout(() => {
                     if (lenis && typeof lenis.resize === "function") lenis.resize();
                     ScrollTrigger.refresh();
                 }, 350);
             });
 
-            // 3. Aparição Suave da Navbar
             setTimeout(() => {
-                const nav = document.getElementById('navbar');
-                if(nav) nav.classList.add('visible');
+                if (el.nav) el.nav.classList.add("visible");
             }, 500);
 
             // 4. Animações de Entrada Avançadas (SplitType + GSAP)
@@ -1277,10 +1288,9 @@
                 ease: "power3.out"
             }, "-=0.4");
 
-            // 5–6. Hero: desktop = pin GSAP (viewport fixo) + scrub do vídeo em 4× altura da janela; mobile = sticky + 400vh (CSS) + vídeo em loop
-            const video = document.getElementById("hero-video");
-            const track = document.getElementById("hero-track");
-            const heroSection = document.getElementById("hero-section");
+            const v = el.video;
+            const track = el.track;
+            const heroSection = el.heroSection;
 
             let targetTime = 0;
             let currentTime = 0;
@@ -1288,28 +1298,24 @@
             let desktopHeroScrubLoopStarted = false;
 
             const startDesktopHeroScrubLoop = () => {
-                if (desktopHeroScrubLoopStarted) return;
+                if (desktopHeroScrubLoopStarted || !v) return;
                 desktopHeroScrubLoopStarted = true;
                 const tick = () => {
-                    if (video.readyState >= 2) {
+                    if (v.readyState >= 2) {
                         currentTime += (targetTime - currentTime) * 0.12;
-                        if (Math.abs(currentTime - video.currentTime) > 0.008) {
-                            video.currentTime = currentTime;
-                        }
+                        if (Math.abs(currentTime - v.currentTime) > 0.008) v.currentTime = currentTime;
                     }
                     requestAnimationFrame(tick);
                 };
                 requestAnimationFrame(tick);
             };
 
-            if (window.innerWidth > 768) {
-                if (video.readyState >= 1) {
-                    videoDuration = (video.duration && video.duration > 0) ? video.duration : 5;
-                }
-                video.addEventListener(
+            if (window.innerWidth > 768 && v && track && heroSection) {
+                if (v.readyState >= 1) videoDuration = v.duration > 0 ? v.duration : 5;
+                v.addEventListener(
                     "loadedmetadata",
                     () => {
-                        videoDuration = (video.duration && video.duration > 0) ? video.duration : 5;
+                        videoDuration = v.duration > 0 ? v.duration : 5;
                     },
                     { once: true }
                 );
@@ -1318,27 +1324,26 @@
                     id: "hero-pin-scrub",
                     trigger: track,
                     start: "top top",
-                    end: () => "+=" + window.innerHeight * 4,
+                    end: () => "+=" + innerHeight * 4,
                     pin: heroSection,
                     pinSpacing: true,
                     scrub: 0.35,
                     anticipatePin: 1,
                     invalidateOnRefresh: true,
                     onUpdate: (self) => {
-                        const dur = (video.duration && video.duration > 0) ? video.duration : videoDuration;
+                        const dur = v.duration > 0 ? v.duration : videoDuration;
                         targetTime = dur * self.progress;
                     }
                 });
 
                 startDesktopHeroScrubLoop();
-            } else {
-                video.loop = true;
-                video.autoplay = true;
-                video.muted = true;
-                video.play().catch(() => {});
+            } else if (v) {
+                v.loop = true;
+                v.autoplay = true;
+                v.muted = true;
+                v.play().catch(() => {});
             }
 
-            // 7. Saída do texto na hero (scrub) — montado após a entrada para o estado “visível” estar estável; fromTo garante reverse ao subir.
             let heroExitScrollMounted = false;
             const mountHeroExitScroll = () => {
                 if (heroExitScrollMounted) return;
@@ -1393,50 +1398,63 @@
 
                 ScrollTrigger.refresh();
             };
-            // 8. Animações de Entrada e Saída da Seção 2
-            // Estado inicial invisível
             gsap.set('.feature-anim-y', { y: 50, opacity: 0 });
             gsap.set('.feature-anim-scale', { scale: 0.95, opacity: 0, filter: 'blur(8px)' });
             gsap.set('.feature-anim-x', { x: 30, opacity: 0 });
 
-            ScrollTrigger.create({
-                trigger: '#features',
-                start: "top 75%",     // Aciona quando a nova dobra chegar em 75% da altura da tela
-                end: "bottom 30%",    // Limite da seção
-                // Play na descida, reverse se sair (tanto pra cima quanto pra baixo)
-                toggleActions: "play reverse play reverse", 
-                animation: gsap.timeline()
-                    .to('.feature-anim-y', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
-                    .to('.feature-anim-scale', { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1, ease: 'power3.out' }, "-=0.4")
-                    .to('.feature-anim-x', { x: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power2.out' }, "-=0.8")
-            });
-
-            // 9. Flashlight Effect Hover Listener
-            document.querySelectorAll('.feature-item').forEach(card => {
-                card.addEventListener('mousemove', e => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
+            if (el.features) {
+                ScrollTrigger.create({
+                    trigger: el.features,
+                    start: "top 75%",
+                    end: "bottom 30%",
+                    toggleActions: "play reverse play reverse",
+                    animation: gsap.timeline()
+                        .to('.feature-anim-y', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+                        .to('.feature-anim-scale', { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1, ease: 'power3.out' }, "-=0.4")
+                        .to('.feature-anim-x', { x: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power2.out' }, "-=0.8")
                 });
-            });
 
-            // 10. Parallax Ghost Background Text
-            gsap.to('.parallax-ghost', {
-                yPercent: -40,
-                ease: "none",
-                scrollTrigger: {
-                    trigger: '#features',
-                    start: "top bottom",
-                    end: "bottom top",
-                    scrub: true
-                }
-            });
+                let featRaf = 0;
+                let featCard = null;
+                let featX = 0;
+                let featY = 0;
+                el.features.addEventListener(
+                    "mousemove",
+                    (e) => {
+                        const card = e.target.closest(".feature-item");
+                        if (!card) return;
+                        const r = card.getBoundingClientRect();
+                        featCard = card;
+                        featX = e.clientX - r.left;
+                        featY = e.clientY - r.top;
+                        if (featRaf) return;
+                        featRaf = requestAnimationFrame(() => {
+                            featRaf = 0;
+                            if (featCard) {
+                                featCard.style.setProperty("--mouse-x", featX + "px");
+                                featCard.style.setProperty("--mouse-y", featY + "px");
+                            }
+                        });
+                    },
+                    { passive: true }
+                );
+            }
 
-            // 11. Horizontal Scroll Gallery
-            const galleryWrapper = document.getElementById("gallery-wrapper");
+            if (el.features) {
+                gsap.to(".parallax-ghost", {
+                    yPercent: -40,
+                    ease: "none",
+                    scrollTrigger: {
+                        trigger: el.features,
+                        start: "top bottom",
+                        end: "bottom top",
+                        scrub: true
+                    }
+                });
+            }
+
             const panels = gsap.utils.toArray(".gallery-panel");
+            const gw = el.galleryWrapper;
 
             let scrollTween = gsap.to(panels, {
                 xPercent: -100 * (panels.length - 1),
@@ -1447,7 +1465,7 @@
                     scrub: 1,
                     anticipatePin: 1,
                     invalidateOnRefresh: true,
-                    end: () => "+=" + galleryWrapper.offsetWidth
+                    end: () => "+=" + (gw ? gw.offsetWidth : 0)
                 }
             });
 
@@ -1471,7 +1489,6 @@
                 });
             });
 
-            ScrollTrigger.refresh();
             requestAnimationFrame(() => ScrollTrigger.refresh());
         });
     </script>
