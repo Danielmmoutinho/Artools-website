@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System 7.0 | Clean-Tech</title>
+
+    <!-- Tailwind Play CDN: Controle absoluto no escopo local -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        base: 'var(--color-base)',
+                        surface: 'var(--color-surface)',
+                        accent: 'var(--color-accent)',
+                        muted: 'var(--color-muted)',
+                        border: 'var(--color-border)',
+                    },
+                    boxShadow: {
+                        premium: 'var(--shadow-premium)',
+                        glow: 'var(--shadow-glow)',
+                        'hover-card': '0 20px 40px -5px rgba(0,0,0,0.05), 0 8px 16px -8px rgba(0,0,0,0.01)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Iconify for premium duotone/linear icons -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- GSAP Core & ScrollTrigger for signature motion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* ----------------------------------------------------
+           Sistematização de Tokens (CSS Variables)
+           Estoque autoritativo de valores baseáveis em `:root`
+        ----------------------------------------------------- */
+        :root {
+            /* Color Palette (Clean-Tech Minimalist) */
+            --color-base: #EAEAE5;           /* Main background from Digital Architect */
+            --color-surface: #FFFFFF;        /* Elevated elements */
+            --color-surface-glass: rgba(255, 255, 255, 0.3); /* Translucent surfaces */
+            --color-accent: #11100F;         /* Pitch stone for contrast */
+            --color-muted: #8E8B85;          /* Sophisticated grey */
+            --color-border: #D6D5CF;         /* Soft dividing lines */
+
+            /* Radius */
+            --radius-sm: 4px;
+            --radius-md: 12px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+
+            /* Shadows */
+            --shadow-premium: 0 4px 60px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-glow: 0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255,255,255,0.7);
+
+            /* Easing Signatures */
+            --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-quick: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background-color: var(--color-base);
+            color: var(--color-accent);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ----------------------------------------------------
+           Backgrounds Dinâmicos e Overlays (Primeira Dobra)
+        ----------------------------------------------------- */
+        .mesh-bg {
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 15% 15%, rgba(255,255,255,0.8) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(255,255,255,0.9) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(200,200,200,0.1) 0%, transparent 60%);
+            filter: blur(50px);
+            z-index: 0;
+            animation: meshDrift 15s ease-in-out infinite alternate;
+        }
+
+        @keyframes meshDrift {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.05) translate(3%, -2%); }
+            100% { transform: scale(1) translate(-2%, 4%); }
+        }
+
+        .grid-overlay {
+            position: absolute;
+            inset: 0;
+            background-size: 32px 32px;
+            background-image:
+                linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
+            z-index: 1;
+            pointer-events: none;
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+
+        /* Glassmorphism Premium Utility */
+        .glass-panel {
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-premium);
+        }
+
+        /* ----------------------------------------------------
+           Motion Lab Utilities (Acompanhamento e Interações)
+        ----------------------------------------------------- */
+        
+        /* Mix-Blend Transparent Lettering */
+        .blend-difference {
+            mix-blend-mode: difference;
+            color: #EAEAE5; /* Over light, difference makes it dark */
+        }
+        
+        /* Text Mask GSAP targets */
+        .text-mask-wrapper {
+            overflow: hidden;
+            display: inline-block;
+            vertical-align: bottom;
+        }
+        .text-mask-content {
+            display: inline-block;
+            transform: translateY(115%);
+        }
+
+        /* Flashlight Hover Card */
+        .flashlight-card {
+            position: relative;
+            background: var(--color-surface);
+            overflow: hidden;
+            border: 1px solid transparent;
+            transition: transform 0.4s var(--ease-smooth), border-color 0.4s var(--ease-smooth);
+        }
+        .flashlight-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(350px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(0, 0, 0, 0.04), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s var(--ease-smooth);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .flashlight-card:hover::before { opacity: 1; }
+        .flashlight-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--color-border);
+            box-shadow: var(--shadow-premium);
+        }
+        .content-z { position: relative; z-index: 2; }
+
+        /* Beam Button Shimmer Premium */
+        .beam-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s var(--ease-smooth);
+        }
+        .beam-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-20deg);
+            z-index: 10;
+        }
+        .beam-btn:hover::before {
+            animation: beamShimmer 0.7s forwards;
+        }
+        @keyframes beamShimmer {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        /* Forms Minimalista */
+        .input-clean {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 0;
+            width: 100%;
+            font-size: 1rem;
+            color: var(--color-accent);
+            transition: border-bottom-color 0.3s var(--ease-quick);
+            border-radius: 0;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-bottom-color: var(--color-accent);
+        }
+        .input-clean::placeholder { color: var(--color-muted); font-weight: 300; }
+
+        /* Marquee Infinito */
+        .marquee-wrapper {
+            display: flex;
+            overflow: hidden;
+            user-select: none;
+        }
+        .marquee-track {
+            display: flex;
+            flex-shrink: 0;
+            min-width: 100%;
+            animation: scrollMarquee 35s linear infinite;
+        }
+        @keyframes scrollMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ----------------------------------------------------
+           Layout Frame
+        ----------------------------------------------------- */
+        .frame-wrapper {
+            max-w-7xl;
+            margin: 0 auto;
+            position: relative;
+            background: var(--color-base);
+            border-left: 1px solid rgba(0,0,0,0.05);
+            border-right: 1px solid rgba(0,0,0,0.05);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+
+<body class="selection:bg-accent selection:text-white">
+
+    <div class="max-w-[1440px] mx-auto relative bg-base shadow-2xl overflow-hidden frame-wrapper">
+        
+        <!-- Navbar Glass -->
+        <nav class="fixed top-0 max-w-[1440px] w-full z-50 px-6 py-5 glass-panel border-b border-white/40 flex justify-between items-center gs-reveal-nav" style="opacity: 0; transform: translateY(-20px);">
+            <div class="flex gap-8 items-center text-xs font-mono uppercase tracking-widest text-muted">
+                <a href="#foundations" class="hover:text-accent transition-colors">Foundations</a>
+                <a href="#components" class="hover:text-accent transition-colors hidden sm:block">Components</a>
+            </div>
+            
+            <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 group cursor-pointer">
+                <iconify-icon class="text-xl group-hover:rotate-180 transition-transform duration-[1s] ease-[cubic-bezier(0.34,1.56,0.64,1)] text-accent" icon="solar:programming-bold-duotone"></iconify-icon>
+                <span class="font-bold tracking-tighter text-lg uppercase">System 7.0</span>
+            </div>
+
+            <div class="flex gap-8 items-center text-xs font-mono uppercase tracking-widest text-muted">
+                <a href="#motion" class="hover:text-accent transition-colors hidden sm:block">Motion Lab</a>
+                <a href="#showcase" class="hover:text-accent transition-colors text-accent font-bold">Practical</a>
+            </div>
+        </nav>
+
+        <!-- ==========================================
+             PRIMEIRA DOBRA (SHOWCASE HERO)
+        =========================================== -->
+        <section class="relative min-h-[90vh] flex items-end pb-24 px-6 md:px-16 border-b border-black/5 z-10 pt-32 overflow-hidden">
+            <!-- Dynamic Background Layers -->
+            <div class="mesh-bg"></div>
+            <div class="grid-overlay"></div>
+
+            <div class="relative z-20 w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
+                
+                <!-- Letreiro Monumental Transparente -->
+                <div class="col-span-1 lg:col-span-8">
+                    <span class="text-xs font-mono tracking-widest uppercase text-muted block mb-6 gs-hero-stagger"><span class="w-8 h-px bg-muted inline-block align-middle mr-3"></span>The Clean-Tech Evolution</span>
+                    <h1 class="text-[5rem] sm:text-[7rem] md:text-[9.5rem] font-medium tracking-tighter leading-[0.85] blend-difference text-accent">
+                        <span class="text-mask-wrapper block"><span class="text-mask-content gs-hero-title">Premium</span></span>
+                        <span class="text-mask-wrapper block"><span class="text-mask-content gs-hero-title">Aesthetics.</span></span>
+                    </h1>
+                </div>
+
+                <!-- Painel Flutuante Lateral (Glass Form / Stats) -->
+                <div class="col-span-1 lg:col-span-4 flex flex-col gap-6 w-full max-w-sm ml-auto relative gs-hero-stagger">
+                    
+                    <div class="glass-panel p-8 rounded-2xl relative group overflow-hidden">
+                        <!-- Microinteração Glow rotativo de fundo -->
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white/40 blur-3xl rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+                        
+                        <div class="flex justify-between items-start mb-12">
+                            <iconify-icon class="text-3xl text-muted group-hover:text-accent transition-colors duration-300" icon="solar:layers-minimalistic-linear"></iconify-icon>
+                            <span class="px-2 py-1 rounded border border-black/10 text-[10px] uppercase font-mono tracking-widest text-muted group-hover:border-accent/30 transition-colors">v7.0.0</span>
+                        </div>
+                        
+                        <h3 class="text-4xl font-semibold tracking-tighter text-accent group-hover:translate-x-2 transition-transform duration-[600ms] ease-[cubic-bezier(0.34,1.56,0.64,1)]">240+</h3>
+                        <p class="text-sm text-muted mt-2">Tokens and UI structures engineered for perfection.</p>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button class="beam-btn flex-grow py-4 px-6 bg-accent text-white rounded-full font-medium text-sm flex items-center justify-center gap-2 hover:shadow-[0_10px_30px_rgba(0,0,0,0.2)]">
+                            Explore Library
+                            <iconify-icon icon="solar:arrow-right-linear" class="text-lg"></iconify-icon>
+                        </button>
+                        <button class="w-14 h-14 border border-border rounded-full flex items-center justify-center text-accent hover:bg-white hover:border-white transition-all bg-surface-glass backdrop-blur-md">
+                            <iconify-icon icon="solar:play-circle-bold-duotone" class="text-2xl"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Divider Infinito -->
+        <div class="border-b border-black/5 bg-white/10 backdrop-blur-sm py-4 gs-fade-up">
+            <div class="marquee-wrapper">
+                <div class="marquee-track items-center text-xs font-mono uppercase tracking-[0.3em] text-muted space-x-12">
+                    <span>Clean-Tech Design System</span><span class="w-2 h-2 rounded-full bg-border"></span>
+                    <span>Architecture Based</span><span class="w-2 h-2 rounded-full bg-border"></span>
+                    <span>Kinetic Animations</span><span class="w-2 h-2 rounded-full bg-border"></span>
+                    <span>Glassmorphism Surfaces</span><span class="w-2 h-2 rounded-full bg-border"></span>
+                    <span>Clean-Tech Design System</span><span class="w-2 h-2 rounded-full bg-border"></span>
+                    <span>Architecture Based</span><span class="w-2 h-2 rounded-full bg-border"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             SEÇÃO I: FUNDAMENTOS / TOKENS
+        =========================================== -->
+        <section id="foundations" class="pt-24 pb-16 px-6 md:px-16 border-b border-black/5 gs-fade-up">
+            <div class="flex items-center gap-4 mb-20">
+                <span class="w-12 h-px bg-accent"></span>
+                <h2 class="text-xs font-mono uppercase tracking-widest text-accent font-bold">Section I — Foundations</h2>
+            </div>
+
+            <!-- Typography Hierarchy -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32 group">
+                <div class="lg:col-span-4 border-l border-border pl-6 relative">
+                    <div class="absolute left-[-1px] top-0 h-0 w-[2px] bg-accent group-hover:h-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
+                    <h3 class="text-2xl font-medium tracking-tight mb-2">Typography</h3>
+                    <p class="text-sm text-muted">Inter & JetBrains Mono acting together as a structural lattice.</p>
+                </div>
+                
+                <div class="lg:col-span-8 flex flex-col gap-10">
+                    <div class="flex items-baseline gap-6 border-b border-black/5 pb-6">
+                        <span class="w-8 text-[10px] font-mono text-muted tracking-widest">H1</span>
+                        <h1 class="text-6xl font-semibold tracking-tighter text-accent">Display Hero</h1>
+                        <span class="ml-auto text-xs font-mono text-muted bg-black/5 px-2 py-1 rounded">6rem / Bold</span>
+                    </div>
+                    <div class="flex items-baseline gap-6 border-b border-black/5 pb-6">
+                        <span class="w-8 text-[10px] font-mono text-muted tracking-widest">H2</span>
+                        <h2 class="text-4xl font-medium tracking-tight text-accent">Section Headline</h2>
+                        <span class="ml-auto text-xs font-mono text-muted bg-black/5 px-2 py-1 rounded">2.25rem / Med</span>
+                    </div>
+                    <div class="flex items-baseline gap-6 border-b border-black/5 pb-6">
+                        <span class="w-8 text-[10px] font-mono text-muted tracking-widest">P</span>
+                        <p class="text-lg text-muted max-w-md">Body relaxed text designed to be readable, elegant, and provide visual rest inside the architecture.</p>
+                        <span class="ml-auto text-xs font-mono text-muted bg-black/5 px-2 py-1 rounded">1.125rem / 160%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Color Palette -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 group">
+                <div class="lg:col-span-4 border-l border-border pl-6 relative">
+                    <div class="absolute left-[-1px] top-0 h-0 w-[2px] bg-accent group-hover:h-full transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]"></div>
+                    <h3 class="text-2xl font-medium tracking-tight mb-2">Color Matrix</h3>
+                    <p class="text-sm text-muted">Variables tied to `:root` providing global cohesion and dark-mode readiness if injected.</p>
+                </div>
+                
+                <div class="lg:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-6">
+                    <!-- Base token -->
+                    <div class="glass-panel p-6 rounded-2xl flex flex-col gap-6 cursor-crosshair hover:bg-white transition-colors duration-500">
+                        <div class="w-12 h-12 rounded-full border border-border shadow-sm bg-base"></div>
+                        <div>
+                            <span class="block text-accent font-medium mb-1">Base Skin</span>
+                            <span class="text-xs font-mono text-muted">#EAEAE5</span>
+                        </div>
+                    </div>
+                    <!-- Surface token -->
+                    <div class="glass-panel bg-surface p-6 rounded-2xl flex flex-col gap-6 cursor-crosshair shadow-hover-card hover:-translate-y-1 transition-all duration-500 border border-white">
+                        <div class="w-12 h-12 rounded-full border border-border shadow-sm bg-surface"></div>
+                        <div>
+                            <span class="block text-accent font-medium mb-1">Surface Canvas</span>
+                            <span class="text-xs font-mono text-muted">#FFFFFF</span>
+                        </div>
+                    </div>
+                    <!-- Accent token -->
+                    <div class="glass-panel bg-accent p-6 rounded-2xl flex flex-col gap-6 cursor-crosshair shadow-hover-card hover:-translate-y-1 transition-all duration-500 border border-black/80 group/dark">
+                        <div class="w-12 h-12 rounded-full border border-white/20 shadow-sm bg-accent group-hover/dark:scale-110 transition-transform"></div>
+                        <div>
+                            <span class="block text-white font-medium mb-1">Pitch Stone</span>
+                            <span class="text-xs font-mono text-white/50">#11100F</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SEÇÃO II: COMPONENT LIBRARY
+        =========================================== -->
+        <section id="components" class="pt-24 pb-16 px-6 md:px-16 border-b border-black/5 bg-surface gs-fade-up">
+            <div class="flex items-center gap-4 mb-20">
+                <span class="w-12 h-px bg-accent"></span>
+                <h2 class="text-xs font-mono uppercase tracking-widest text-accent font-bold">Section II — Components</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+                <!-- Surfaces & Buttons -->
+                <div>
+                    <h3 class="text-lg font-mono uppercase tracking-widest text-muted mb-10 border-b border-border pb-4">Interaction / Buttons</h3>
+                    
+                    <div class="space-y-8">
+                        <div class="flashlight-card p-10 rounded-2xl border border-border flex flex-col items-center justify-center min-h-[300px] gap-8 bg-base/50"
+                             onmousemove="const rect = this.getBoundingClientRect(); this.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`); this.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`);">
+                            
+                            <span class="content-z text-xs font-mono text-muted text-center max-w-[200px]">Moves a radial gradient matching your cursor.</span>
+                            
+                            <button class="content-z beam-btn px-8 py-4 bg-accent text-white rounded-full font-medium text-sm flex items-center gap-3">
+                                Beam Primary
+                                <iconify-icon icon="solar:call-dropped-bold-duotone" class="text-lg"></iconify-icon>
+                            </button>
+                            
+                            <button class="content-z px-8 py-3 border border-border hover:border-accent text-accent rounded-full font-medium text-sm flex items-center gap-3 transition-colors bg-white/50 backdrop-blur-sm">
+                                Glass Secondary Outline
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modals & Forms -->
+                <div>
+                    <h3 class="text-lg font-mono uppercase tracking-widest text-muted mb-10 border-b border-border pb-4">Inputs & Feedback</h3>
+                    
+                    <div class="bg-base border border-border rounded-2xl p-10 relative overflow-hidden group/form">
+                        <!-- BG Deco -->
+                        <div class="absolute top-0 right-0 p-4 opacity-10">
+                            <iconify-icon icon="solar:square-academic-linear" class="text-9xl"></iconify-icon>
+                        </div>
+
+                        <div class="relative z-10 space-y-10">
+                            <!-- Badges -->
+                            <div class="flex gap-3">
+                                <span class="bg-surface border border-border text-xs px-3 py-1 rounded-full font-mono font-medium shadow-sm">Status: Operational</span>
+                                <span class="bg-accent text-white text-xs px-3 py-1 rounded-full font-mono font-medium shadow-sm flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Live
+                                </span>
+                            </div>
+
+                            <!-- Input Premium -->
+                            <div>
+                                <label class="text-xs font-bold font-mono tracking-widest uppercase text-muted mb-1 block">Full Name</label>
+                                <input type="text" placeholder="Enter your detail..." class="input-clean font-medium">
+                            </div>
+                            
+                            <!-- Toggle / Select imitation -->
+                            <div class="flex items-center justify-between border-b border-border pb-4 text-accent hover:border-accent transition-colors cursor-pointer pt-4">
+                                <span class="font-medium text-sm">Select Service Type</span>
+                                <iconify-icon icon="solar:alt-arrow-down-linear"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SEÇÃO III: MOTION LAB
+        =========================================== -->
+        <section id="motion" class="pt-24 pb-16 px-6 md:px-16 border-b border-black/5 bg-accent text-white gs-fade-up">
+            <div class="flex items-center gap-4 mb-20">
+                <span class="w-12 h-px bg-muted"></span>
+                <h2 class="text-xs font-mono uppercase tracking-widest text-muted font-bold">Section III — Motion Lab</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative z-10">
+                <!-- Box 1 -->
+                <div class="p-12 border border-white/10 rounded-2xl flex flex-col items-center gap-6 hover:bg-white/5 transition-colors cursor-pointer group gs-motion-stagger">
+                    <iconify-icon icon="solar:magic-stick-3-bold-duotone" class="text-4xl text-white/50 group-hover:text-white transition-colors duration-500"></iconify-icon>
+                    <h4 class="text-xl font-medium tracking-tight">Kinetic Rebound</h4>
+                    <p class="text-xs font-mono text-muted">Ease: cubic-bezier(0.34, 1.56, 0.64, 1)</p>
+                </div>
+                
+                <!-- Box 2: GSAP Example Target -->
+                <div class="p-12 border border-border bg-surface text-accent rounded-2xl flex flex-col items-center gap-6 cursor-pointer relative overflow-hidden gs-motion-stagger">
+                    <div class="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,rgba(0,0,0,0.05))]"></div>
+                    <iconify-icon icon="solar:graph-up-bold-duotone" class="text-4xl text-muted"></iconify-icon>
+                    <h4 class="text-xl font-medium tracking-tight">Scroll Triggered</h4>
+                    <p class="text-xs font-mono text-muted">Staggering fade-ups binding UX to user scroll actions.</p>
+                </div>
+                
+                <!-- Box 3 -->
+                <div class="p-12 border border-white/10 rounded-2xl flex flex-col justify-center gs-motion-stagger">
+                    <h2 class="text-4xl font-bold tracking-tighter">
+                        <span class="text-mask-wrapper block"><span class="text-mask-content text-white uppercase" style="transform:translateY(0);opacity:1;">Masked</span></span>
+                        <span class="text-mask-wrapper block"><span class="text-mask-content text-white/40 uppercase" style="transform:translateY(0);opacity:1;">Text</span></span>
+                    </h2>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             SEÇÃO IV: APLICAÇÃO PRÁTICA (SHOWCASE WIDGET)
+        =========================================== -->
+        <section id="showcase" class="pt-24 pb-32 px-6 md:px-16 relative overflow-hidden gs-fade-up">
+            <!-- Mega shadow backdrop -->
+            <div class="absolute top-[20%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-white opacity-40 blur-[120px] rounded-full pointer-events-none z-0"></div>
+
+            <div class="flex items-center gap-4 mb-20 relative z-10">
+                <span class="w-12 h-px bg-accent"></span>
+                <h2 class="text-xs font-mono uppercase tracking-widest text-accent font-bold">Section IV — Real Application Setup</h2>
+            </div>
+            
+            <div class="relative z-10 max-w-5xl mx-auto glass-panel p-4 md:p-8 rounded-[2rem] border border-white shadow-2xl bg-white/60">
+                <!-- Window mock header -->
+                <div class="flex gap-2 mb-8 ml-2">
+                    <div class="w-3 h-3 rounded-full bg-black/10"></div>
+                    <div class="w-3 h-3 rounded-full bg-black/10"></div>
+                    <div class="w-3 h-3 rounded-full bg-black/10"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Artigo Card -->
+                    <div class="col-span-1 bg-surface border border-border rounded-xl p-8 flashlight-card"
+                         onmousemove="const rect = this.getBoundingClientRect(); this.style.setProperty('--mouse-x', `${event.clientX - rect.left}px`); this.style.setProperty('--mouse-y', `${event.clientY - rect.top}px`);">
+                         
+                        <div class="content-z flex flex-col h-full justify-between gap-12">
+                            <div>
+                                <span class="bg-base border border-border text-xs px-3 py-1 rounded font-mono font-medium shadow-sm mb-6 inline-block">Design Process</span>
+                                <h3 class="text-2xl font-medium tracking-tight mb-3">Architectural Tokens</h3>
+                                <p class="text-muted text-sm leading-relaxed">Systematic arrangement of CSS variables enabling strict consistency and native scale-up capabilities across domains.</p>
+                            </div>
+                            
+                            <a href="#" class="text-sm font-bold uppercase tracking-widest border-b-2 border-accent pb-1 inline-flex items-center gap-2 hover:pl-2 transition-all">
+                                Read Documentation <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 flex flex-col gap-4">
+                        <!-- Small Data Widget -->
+                        <div class="bg-accent text-white p-8 rounded-xl flex items-center justify-between group hover:scale-[1.02] transition-transform duration-500 cursor-pointer shadow-lg">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-white/10 rounded border border-white/20 flex items-center justify-center">
+                                    <iconify-icon icon="solar:server-square-bold-duotone" class="text-2xl"></iconify-icon>
+                                </div>
+                                <div>
+                                    <span class="block font-medium text-lg">System Core</span>
+                                    <span class="text-xs font-mono text-white/50">Fully Online</span>
+                                </div>
+                            </div>
+                            <div class="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_10px_#4ade80]"></div>
+                        </div>
+
+                        <!-- Image/Graphic Block -->
+                        <div class="flex-grow bg-base border border-border rounded-xl overflow-hidden relative group/img">
+                            <div class="absolute inset-0 bg-transparent group-hover/img:bg-accent/10 transition-colors duration-500 z-10 pointer-events-none"></div>
+                            <!-- Mocking an image block with gradient since I don't import external imgs randomly -->
+                            <div class="absolute inset-0 bg-gradient-to-tr from-stone-300 via-stone-200 to-white transform transition-transform duration-1000 group-hover/img:scale-105"></div>
+                            <div class="absolute bottom-6 left-6 z-20">
+                                <span class="text-xs bg-white/80 backdrop-blur font-mono px-3 py-1 rounded-full border border-black/10">Figure 01: Layout Grid</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-32 text-accent pb-8">
+                <span class="text-[8rem] sm:text-[14rem] font-bold leading-none tracking-tighter mix-blend-overlay opacity-10 uppercase block select-none">Clean.</span>
+                <p class="text-sm font-mono tracking-widest text-muted mt-8 uppercase">End of document — Designed exclusively with local tokens</p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- --------------------------------------------------
+         Lógica de Inicialização de Motion Lab via GSAP 
+         + Nav bar handling
+    --------------------------------------------------- -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Register ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+
+            const tl = gsap.timeline();
+
+            // 1. Initial Nav e Hero Reveal
+            tl.to('.gs-reveal-nav', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' })
+              .to('.gs-hero-stagger', { opacity: 1, y: 0, duration: 0.8, stagger: 0.2, ease: 'power3.out' }, '-=0.5');
+
+            // Text Mask Cinema Effect on Load
+            gsap.to('.gs-hero-title', { 
+                y: '0%', 
+                duration: 1.2, 
+                stagger: 0.15, 
+                ease: 'expo.out',
+                delay: 0.2 
+            });
+
+            // 2. Observer Scroll Triggers gerais para as Sections
+            gsap.utils.toArray('.gs-fade-up').forEach(section => {
+                gsap.fromTo(section, 
+                    { opacity: 0, y: 40 }, 
+                    { 
+                        opacity: 1, y: 0, 
+                        duration: 1, 
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: section,
+                            start: 'top 85%',
+                            toggleActions: 'play none none none'
+                        }
+                    }
+                );
+            });
+
+            // 3. Stagger em blocos do Motion Lab
+            gsap.from('.gs-motion-stagger', {
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: 'back.out(1.4)',
+                scrollTrigger: {
+                    trigger: '#motion',
+                    start: 'top 70%'
+                }
+            });
+            
+            // Lógica para navegação blur (ajustar opacidade/sombra no scroll)
+            const nav = document.querySelector('nav');
+            window.addEventListener('scroll', () => {
+                if(window.scrollY > 50) {
+                    nav.classList.add('shadow-premium', 'bg-white/70');
+                    nav.classList.remove('border-white/40');
+                } else {
+                    nav.classList.remove('shadow-premium', 'bg-white/70');
+                    nav.classList.add('border-white/40');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

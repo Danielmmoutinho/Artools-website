@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caneta Edição Limitada — ARTOOLS System v6</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Iconify -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <style>
+        /* Design Tokens baseados no design_system6.html */
+        :root {
+            --color-bg: #FFFFFF;
+            --color-text: #1C1C1C;
+            --color-text-muted: #9B9B9B;
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'Space Mono', 'Courier New', monospace;
+            --radius-full: 9999px;
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow-glow: 0 0 40px rgba(28,28,28,0.12);
+            --shadow-btn: 0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Ocultando a scrollbar original já que usaremos Lenis */
+        body::-webkit-scrollbar { display: none; } 
+
+        /* =============================================
+           NAVBAR
+        ============================================= */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            padding: 1.5rem 6vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.8s var(--ease-smooth);
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            color: #fff;
+        }
+        .navbar.visible { opacity: 1; }
+        
+        .nav-logo {
+            font-weight: 900;
+            font-size: 1.25rem;
+            letter-spacing: -0.04em;
+        }
+        
+        .nav-links {
+            display: none; /* Mobile first hidden */
+        }
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+                gap: 2.5rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                font-family: var(--font-mono);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #fff; }
+
+        /* =============================================
+           BOTÕES E CTA
+        ============================================= */
+        .btn-primary {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #1C1C1C;
+            border-radius: var(--radius-full);
+            padding: 0.875rem 2.2rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s;
+            box-shadow: var(--shadow-btn);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255,255,255,0.25);
+        }
+        .btn-primary .shimmer {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+            transform: skewX(-15deg) translateX(-150%);
+            animation: shimmerEffect 2s continuous infinite;
+        }
+        @keyframes shimmerEffect {
+            0% { transform: skewX(-15deg) translateX(-150%); }
+            50%, 100% { transform: skewX(-15deg) translateX(150%); }
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: opacity 0.3s;
+        }
+        .btn-secondary::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: #fff;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s var(--ease-smooth);
+        }
+        .btn-secondary:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        .btn-secondary:hover { opacity: 0.85; }
+
+        /* =============================================
+           LAYOUT DA HERO SECTION (PARALLAX SCRUB)
+        ============================================= */
+        .hero-track {
+            height: 400vh; /* Altura total para mapear o scroll */
+            background: #000;
+            position: relative;
+        }
+        .hero-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        /* =============================================
+           VÍDEO DE FUNDO E OVERLAY
+        ============================================= */
+        .hero-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            z-index: 1;
+            will-change: transform;
+            transform: translateZ(0); 
+            opacity: 0.95;
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+            z-index: 2;
+        }
+
+        /* =============================================
+           CONTEÚDO DA HERO
+        ============================================= */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            padding: 0 6vw;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        /* Badge Animado */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: 0.7srem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            animation: pulseBadge 2.5s infinite ease-in-out;
+            will-change: transform;
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,255,255,0.15); }
+        }
+
+        /* Tipografia */
+        .hero-title {
+            font-size: clamp(3.5rem, 8vw, 6.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            max-width: 800px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hero-title .highlight {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.8);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.8);
+            max-width: 480px;
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Ajustes SplitType */
+        .line { overflow: hidden; padding-bottom: 0.2rem; }
+        .word { will-change: transform, opacity; }
+
+        /* =============================================
+           CURSOR CUSTOMIZADO (Extra Polish)
+        ============================================= */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            .custom-cursor {
+                position: fixed;
+                top: 0; left: 0;
+                width: 20px; height: 20px;
+                border-radius: 50%;
+                background: #fff;
+                mix-blend-mode: difference;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s, height 0.3s, background 0.3s, border 0.3s;
+                will-change: transform;
+            }
+            .custom-cursor.hover {
+                width: 50px; height: 50px;
+                background: transparent;
+                border: 1.5px solid #fff;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cursor Customizado -->
+    <div class="custom-cursor bg-white" id="cursor"></div>
+
+    <!-- Navegação -->
+    <header class="navbar" id="navbar">
+        <div class="nav-logo cursor-hover">ARTOOLS</div>
+        <nav class="nav-links">
+            <a href="#" class="cursor-hover">A Caneta</a>
+            <a href="#" class="cursor-hover">Design</a>
+            <a href="#" class="cursor-hover">Especificações</a>
+        </nav>
+        <button class="btn-primary cursor-hover" style="padding: 0.6rem 1.5rem; font-size: 0.75rem;">
+            Comprar Agora
+            <div class="shimmer"></div>
+        </button>
+    </header>
+
+    <!-- Parallax Hero Track -->
+    <section class="hero-track" id="hero-track">
+        <div class="hero-sticky" id="hero-section">
+            
+            <!-- Video Background - Scrub Effect -->
+            <video 
+                id="hero-video" 
+                class="hero-video" 
+                src="artools/assets/raw_files/MeuVideo.mp4" 
+                muted 
+                playsinline 
+                preload="auto">
+            </video>
+            
+            <!-- Overlay escuro esquerdo para leitura -->
+            <div class="video-overlay"></div>
+
+            <!-- Conteúdo em bloco esquerdo -->
+            <div class="hero-content">
+                <div class="hero-badge cursor-hover">
+                    <span>✦</span> Edição Limitada
+                </div>
+                
+                <h1 class="hero-title" id="hero-title">
+                    A caneta que <br>
+                    <span class="highlight">redefine</span> o escrever
+                </h1>
+                
+                <p class="hero-subtitle" id="hero-subtitle">
+                    Precisão milimétrica, design que dura gerações.<br>
+                    Cada traço, uma declaração.
+                </p>
+
+                <div class="hero-actions" id="hero-actions">
+                    <button class="btn-primary cursor-hover" style="font-size: 1rem; padding: 1rem 2.5rem;">
+                        Adquirir Agora
+                        <div class="shimmer"></div>
+                    </button>
+                    <a href="#" class="btn-secondary cursor-hover">
+                        <iconify-icon icon="solar:play-bold" class="text-xl"></iconify-icon>
+                        Ver em ação
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Scripts CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. Cursor Customizado (Animação Suave)
+            const cursor = document.getElementById('cursor');
+            if (window.matchMedia("(pointer: fine)").matches) {
+                let mouseX = window.innerWidth / 2;
+                let mouseY = window.innerHeight / 2;
+                let cursorX = mouseX;
+                let cursorY = mouseY;
+                
+                // Cursor interpolação 1D via GSAP Ticker
+                gsap.ticker.add(() => {
+                    cursorX += (mouseX - cursorX) * 0.15;
+                    cursorY += (mouseY - cursorY) * 0.15;
+                    if(cursor) {
+                        cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+                    }
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                });
+
+                // Efeito Hover em elementos clicáveis
+                const hoverElements = document.querySelectorAll('.cursor-hover, a, button');
+                hoverElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                });
+            }
+
+            // 2. Lenis Smooth Scroll Setup
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smooth: true,
+            });
+
+            lenis.on('scroll', ScrollTrigger.update);
+            gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+            gsap.ticker.lagSmoothing(0);
+
+            // 3. Aparição Suave da Navbar
+            setTimeout(() => {
+                const nav = document.getElementById('navbar');
+                if(nav) nav.classList.add('visible');
+            }, 500);
+
+            // 4. Animações de Entrada Avançadas (SplitType + GSAP)
+            const title = new SplitType('#hero-title', { types: 'lines, words' });
+            const subtitle = new SplitType('#hero-subtitle', { types: 'lines' });
+
+            // Estado inicial escondido
+            gsap.set(title.words, { y: 120, opacity: 0 });
+            gsap.set(subtitle.lines, { y: 40, opacity: 0 });
+            gsap.set('.hero-badge', { opacity: 0, y: 30 });
+            gsap.set('#hero-actions', { opacity: 0, y: 30 });
+
+            // Timeline de entrada Sequencial
+            const tl = gsap.timeline({ 
+                delay: 0.3,
+                onComplete: () => {
+                    // Libera o overflow da mask do SplitType para o Blur vazar limpo
+                    gsap.set('.line', { overflow: 'visible' });
+                }
+            });
+            
+            tl.to('.hero-badge', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            })
+            // Animando as palavras com stagger
+            .to(title.words, {
+                y: 0,
+                opacity: 1,
+                duration: 1,
+                stagger: 0.04,
+                ease: "power4.out"
+            }, "-=0.4")
+            // Subtítulo depois do título
+            .to(subtitle.lines, {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power3.out"
+            }, "-=0.6")
+            // Botões e Actions
+            .to('#hero-actions', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            }, "-=0.4");
+
+            // 5. Animação de Saída (Fade + Blur) com progressão de Scroll
+            const exitTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#hero-track',
+                    start: "top top",
+                    end: "800px top",
+                    scrub: 1
+                }
+            });
+
+            exitTl.to(title.words, {
+                y: -60,
+                opacity: 0,
+                filter: "blur(12px)",
+                stagger: 0.02,
+                ease: "power1.inOut"
+            }, 0)
+            .to(subtitle.lines, {
+                y: -40,
+                opacity: 0,
+                filter: "blur(10px)",
+                stagger: 0.02,
+                ease: "power1.inOut"
+            }, 0)
+            .to(['.hero-badge', '#hero-actions'], {
+                y: -30,
+                opacity: 0,
+                filter: "blur(8px)",
+                ease: "power1.inOut"
+            }, 0);
+
+            // 6. Parallax Video Scrubbing (ScrollTrigger)
+            const video = document.getElementById('hero-video');
+            const track = document.getElementById('hero-track');
+            
+            let targetTime = 0;
+            let currentTime = 0;
+            let videoDuration = 0;
+
+            const initVideoScrub = () => {
+                videoDuration = video.duration || 5; 
+                
+                ScrollTrigger.create({
+                    trigger: track,
+                    start: "top top",
+                    end: "bottom bottom",
+                    onUpdate: (self) => {
+                        targetTime = videoDuration * self.progress;
+                    }
+                });
+
+                // Interpolação super suave usando RequestAnimationFrame
+                const renderVideoFrame = () => {
+                    if (video.readyState >= 2) { // 2 = HAVE_CURRENT_DATA
+                        // Interpolação linear (Lerp) de damping 0.1
+                        currentTime += (targetTime - currentTime) * 0.1;
+                        
+                        // Atualiza o tempo do player somente se a diferença for significativa
+                        if (Math.abs(currentTime - video.currentTime) > 0.01) {
+                            video.currentTime = currentTime;
+                        }
+                    }
+                    requestAnimationFrame(renderVideoFrame);
+                };
+                renderVideoFrame();
+            };
+
+            // Certifica-se de que o metadata foi carregado para termos o video.duration correto
+            if (video.readyState >= 1) { // 1 = HAVE_METADATA
+                initVideoScrub();
+            } else {
+                video.addEventListener('loadedmetadata', initVideoScrub);
+            }
+        });
+    </script>
+</body>
+</html>

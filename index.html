@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Pen | Edição Limitada</title>
+
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        base: '#EAEAE5',
+                        surface: '#FFFFFF',
+                        accent: '#11100F',
+                        muted: '#8E8B85',
+                        border: '#D6D5CF',
+                    },
+                    boxShadow: {
+                        premium: '0 4px 60px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0,0,0,0.02)',
+                        glow: '0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255,255,255,0.7)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts conforme Design System 7.0 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    
+    <!-- Iconify para os ícones duotone/linear exigidos no DS -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+
+    <!-- Bibliotecas de Animação e Scroll Avançado -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+
+    <style>
+        /* CSS Variables & Tokens do Design System 7.0 */
+        :root {
+            --color-base: #EAEAE5;
+            --color-surface: #FFFFFF;
+            --color-surface-glass: rgba(255, 255, 255, 0.1);
+            --color-accent: #11100F;
+            --color-muted: #8E8B85;
+            --color-border: #D6D5CF;
+
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --shadow-premium: 0 4px 60px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-glow: 0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255,255,255,0.7);
+        }
+
+        body {
+            background-color: var(--color-base);
+            color: var(--color-accent);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            /* Cursor Clean-Tech Default */
+            cursor: default;
+        }
+
+        /* -------------------------------------------------------------------------
+           Integração base do Lenis para sobrescrever nativos indesejados
+        -------------------------------------------------------------------------- */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+
+        /* -------------------------------------------------------------------------
+           Utilities do Design System 7.0 (Glass, Beam Btn, Blend)
+        -------------------------------------------------------------------------- */
+        .glass-panel {
+            background: var(--color-surface-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* O botão Beam adaptado para cenário escuro/vídeo mantendo a assinatura */
+        .beam-btn {
+            position: relative;
+            overflow: hidden;
+            background: #FFFFFF;
+            color: var(--color-accent);
+            transition: all 0.4s var(--ease-smooth);
+            will-change: transform;
+            transform: translateZ(0); 
+        }
+        .beam-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(0,0,0,0.08), transparent);
+            transform: skewX(-20deg);
+            z-index: 10;
+            animation: beamShimmerLoop 3s infinite;
+        }
+        @keyframes beamShimmerLoop {
+            0% { left: -150%; }
+            15% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        /* Destaque cromático de blend difference (Signature do DS) */
+        .text-keyword-highlight {
+            color: var(--color-surface); /* Palavra-chave em cor branca pura */
+            font-weight: 700;
+        }
+
+        /* Split-Type inicial states for chars */
+        .char {
+            transform: translateY(115%);
+            will-change: transform;
+        }
+
+        /* Gradient mask para o container de vídeo para imersão perfeita com a section de baixo */
+        .hero-video-container {
+            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+        }
+        
+    </style>
+</head>
+<body class="selection:bg-white selection:text-black">
+
+    <!-- ==============================================
+         NAVBAR (Fixo, Glassmorphism, Entrance delay)
+    ================================================ -->
+    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-5 glass-panel flex justify-between items-center opacity-0 nav-reveal" style="transform: translateY(-20px);">
+        <!-- Logo -->
+        <div class="flex items-center gap-2 text-white group cursor-pointer hover:opacity-80 transition-opacity">
+            <iconify-icon class="text-2xl text-white group-hover:rotate-180 transition-transform duration-[1.2s] ease-[cubic-bezier(0.34,1.56,0.64,1)]" icon="solar:pen-new-square-bold-duotone"></iconify-icon>
+            <span class="font-bold tracking-tighter text-lg uppercase mix-blend-difference">Aura</span>
+        </div>
+        
+        <!-- Links -->
+        <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 gap-10 items-center text-xs font-mono uppercase tracking-[0.2em] text-white/50">
+            <a href="#" class="hover:text-white transition-colors">Manifesto</a>
+            <a href="#" class="hover:text-white transition-colors">Engenharia</a>
+            <a href="#" class="hover:text-white transition-colors">Galeria</a>
+        </div>
+
+        <!-- CTA Nav -->
+        <button class="px-6 py-2.5 bg-white/10 border border-white/20 text-white rounded-full text-[10px] font-mono font-bold uppercase tracking-widest hover:bg-white hover:text-accent transition-colors duration-500 glass-panel backdrop-blur-md">
+            Comprar Agora
+        </button>
+    </nav>
+
+    <!-- ==============================================
+         HERO SECTION (Apple Scrub Parallax System)
+         400vh altura para permitir espaço de scroll
+    ================================================ -->
+    <section id="hero-section" class="relative h-[400vh] bg-[#080808]">
+        
+        <!-- Posição Sticky (prende a tela e renderiza a lógica visual) -->
+        <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center">
+            
+            <!-- Video Background (object-cover, GPU accelerada) -->
+            <div class="absolute inset-0 z-0 hero-video-container">
+                <video id="hero-video" 
+                       src="artools/assets/raw_files/MeuVideo.mp4" 
+                       class="w-full h-full object-cover opacity-[0.85]" 
+                       muted playsinline preload="auto" 
+                       style="pointer-events: none; transform: translateZ(0); will-change: transform, filter;"></video>
+                       
+                <!-- Overlay Gradient para garantir leitura -->
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-[#080808]/10"></div>
+                <!-- Ambient Glow Behind Text -->
+                <div class="absolute top-[30%] left-[-10%] w-[500px] h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none"></div>
+            </div>
+
+            <!-- Foreground Content Grid -->
+            <div class="relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
+                
+                <!-- Coluna Esquerda: Textos / CTA -->
+                <div class="col-span-1 lg:col-span-6 xl:col-span-5 flex flex-col justify-center h-full pt-16">
+                    
+                    <!-- Badge Animado Loop -->
+                    <div class="mb-10 w-fit opacity-0 badge-anim" style="transform: translateY(10px);">
+                        <span class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/[0.03] backdrop-blur-md text-white text-[10px] font-mono tracking-[0.2em] uppercase badge-bounce">
+                            <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_12px_#ffffff]"></span>
+                            ✦ Edição Limitada
+                        </span>
+                    </div>
+
+                    <!-- Headline (GSAP SplitType Letter by Letter) -->
+                    <h1 class="text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] font-medium tracking-tighter leading-[0.95] text-white/90 mb-8 headline-anim">
+                        A caneta que<br>
+                        <span class="text-keyword-highlight italic pr-2">redefine</span>o escrever
+                    </h1>
+
+                    <!-- Descrição / Subtitle -->
+                    <p class="text-base sm:text-lg text-white/60 max-w-sm font-light leading-[1.8] mb-12 opacity-0 subtitle-anim" style="transform: translateY(20px);">
+                        Precisão milimétrica, design que dura gerações. Cada traço, uma declaração absoluta de intenção.
+                    </p>
+
+                    <!-- Actions Layer -->
+                    <div class="flex gap-4 flex-wrap opacity-0 buttons-anim" style="transform: translateY(20px);">
+                        <button class="beam-btn px-8 py-4 rounded-full font-medium text-sm flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
+                            Adquirir Agora
+                            <iconify-icon icon="solar:arrow-right-linear" class="text-lg opacity-80"></iconify-icon>
+                        </button>
+                        
+                        <button class="px-8 py-4 border border-white/15 text-white/80 hover:text-white rounded-full font-medium text-sm flex items-center justify-center gap-3 hover:bg-white/[0.08] hover:border-white/30 transition-all duration-300 glass-panel">
+                            <iconify-icon icon="solar:play-circle-bold-duotone" class="text-xl"></iconify-icon>
+                            Ver em ação
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Coluna Direita: Vazia p/ foco total no vídeo -->
+                <div class="col-span-1 lg:col-span-6 xl:col-span-7 hidden lg:block"></div>
+
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-0 scroll-indic-anim">
+                <span class="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30">Scroll to Explore</span>
+                <div class="w-[1px] h-12 bg-white/10 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-full bg-white/80 origin-top animate-[scaleYDown_2s_infinite]"></div>
+                </div>
+            </div>
+            <!-- Animação do tracejado vertical de scroll -->
+            <style>
+                @keyframes scaleYDown {
+                    0% { transform: scaleY(0); transform-origin: top; }
+                    50% { transform: scaleY(1); transform-origin: top; }
+                    50.1% { transform: scaleY(1); transform-origin: bottom; }
+                    100% { transform: scaleY(0); transform-origin: bottom; }
+                }
+            </style>
+        </div>
+    </section>
+
+    <!-- ==============================================
+         CONTINUAÇÃO (Mock Section de Transição)
+    ================================================ -->
+    <section class="min-h-[50vh] bg-base py-32 px-6 flex items-center justify-center border-t border-black/5 relative z-20">
+        <div class="text-center max-w-2xl mx-auto gs-fade-up">
+            <span class="inline-block w-8 h-px bg-accent mb-6"></span>
+            <h2 class="text-4xl md:text-5xl font-medium tracking-tight mb-6 text-accent">Engenharia Perfeita.</h2>
+            <p class="text-muted leading-relaxed font-light text-lg">O vídeo avançou de acordo com o seu fluxo. O layout do Design System 7.0 garante as transições mais puras e fluidas.</p>
+        </div>
+    </section>
+
+    <!-- ==============================================
+         LÓGICA CORE: Animações, Video Scrub, Scroll
+    ================================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. INICIALIZAÇÃO LENIS (SMOOTH SCROLL HD)
+            const lenis = new Lenis({
+                autoRaf: false,  // GSAP Ticker controller
+                duration: 1.5,   // Mais suave ainda
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+            });
+
+            // Sincronizando Lenis + GSAP perfeitamente
+            gsap.registerPlugin(ScrollTrigger);
+            
+            lenis.on('scroll', ScrollTrigger.update);
+            
+            gsap.ticker.add((time) => {
+                lenis.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
+
+            // 2. TIMELINE DA HERO SECTION (Entrance animations)
+            const headlineSplit = new SplitType('.headline-anim', { types: 'chars, words' });
+            const tlInit = gsap.timeline({ defaults: { ease: 'expo.out' } });
+
+            tlInit.to('.nav-reveal', { opacity: 1, y: 0, duration: 1.5, delay: 0.2 })
+                  .to('.badge-anim', { opacity: 1, y: 0, duration: 1.2, ease: 'back.out(1.5)' }, '-=1')
+                  .to(headlineSplit.chars, { 
+                      y: '0%', 
+                      duration: 1.4, 
+                      stagger: 0.025, 
+                      ease: 'power4.out',
+                      onStart: () => gsap.set(headlineSplit.chars, { willChange: 'transform' }),
+                      onComplete: () => gsap.set(headlineSplit.chars, { willChange: 'auto' })
+                  }, '-=1.2')
+                  .to('.subtitle-anim', { opacity: 1, y: 0, duration: 1.5 }, '-=1.2')
+                  .to('.buttons-anim', { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }, '-=1.3')
+                  .to('.scroll-indic-anim', { opacity: 1, duration: 2, ease: 'power2.inOut' }, '-=0.5');
+
+            // Float constante do badge
+            gsap.to('.badge-bounce', {
+                y: -4,
+                duration: 2.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'sine.inOut'
+            });
+            
+            // Fade-up genérico
+            gsap.fromTo('.gs-fade-up', 
+                { opacity: 0, y: 40 }, 
+                { 
+                    opacity: 1, y: 0, duration: 1.2, ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: '.gs-fade-up', start: 'top 80%', toggleActions: 'play none none reverse'
+                    }
+                }
+            );
+
+            // 3. VIDEO PARALLAX SCRUB (MUDANÇA PARA MOTOR NATIVO DO GSAP)
+            // Em vez de calcularmos via requestAnimationFrame manual que depende da CPU,
+            // vamos entregar a modulação do tempo para a timeline avançada do ScrollTrigger
+            const video = document.querySelector('#hero-video');
+            const section = document.querySelector('#hero-section');
+
+            // Pausa explícita obrigatória
+            video.pause();
+
+            // Uma promessa que checa se o meta e o primeiro frame carregaram antes de iniciar o hook
+            let loaded = false;
+
+            video.addEventListener('loadeddata', () => {
+                if(loaded) return;
+                loaded = true;
+
+                // Animação de Scrubbing do GSAP puro
+                gsap.to(video, {
+                    currentTime: video.duration,
+                    ease: "none", // Progresso linear obrigatório (o lenis/scrub que dará suavidade)
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top top",
+                        end: () => "+=" + (section.offsetHeight - window.innerHeight),
+                        scrub: 0.8, // Valor numérico aplica um 'catch-up' super suave. (0.5 a 1s = muito natural)
+                    }
+                });
+            });
+
+            // Se o metadado carregar muito rápido do cache, força a emissão inicial
+            if (video.readyState >= 2) {
+                video.dispatchEvent(new Event('loadeddata'));
+            } else {
+                video.load();
+            }
+        });
+    </script>
+</body>
+</html>
