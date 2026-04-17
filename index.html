@@ -1234,11 +1234,11 @@
             gsap.set('#hero-actions', { opacity: 0, y: 30 });
 
             // Timeline de entrada Sequencial
-            const tl = gsap.timeline({ 
+            const tl = gsap.timeline({
                 delay: 0.3,
                 onComplete: () => {
-                    // Libera o overflow da mask do SplitType para o Blur vazar limpo
-                    gsap.set('.line', { overflow: 'visible' });
+                    gsap.set(".line", { overflow: "visible" });
+                    mountHeroExitScroll();
                 }
             });
             
@@ -1333,37 +1333,61 @@
                 video.play().catch(() => {});
             }
 
-            // 7. Saída do texto na hero (primeiros ~800px de rolagem, dentro da fase pinada no desktop)
-            const exitTl = gsap.timeline({
-                scrollTrigger: {
-                    trigger: track,
-                    start: "top top",
-                    end: "+=800",
-                    scrub: 1,
-                    invalidateOnRefresh: true
-                }
-            });
+            // 7. Saída do texto na hero (scrub) — montado após a entrada para o estado “visível” estar estável; fromTo garante reverse ao subir.
+            let heroExitScrollMounted = false;
+            const mountHeroExitScroll = () => {
+                if (heroExitScrollMounted) return;
+                heroExitScrollMounted = true;
 
-            exitTl.to(title.words, {
-                y: -60,
-                opacity: 0,
-                filter: "blur(12px)",
-                stagger: 0.02,
-                ease: "power1.inOut"
-            }, 0)
-            .to(subtitle.lines, {
-                y: -40,
-                opacity: 0,
-                filter: "blur(10px)",
-                stagger: 0.02,
-                ease: "power1.inOut"
-            }, 0)
-            .to(['.hero-badge', '#hero-actions'], {
-                y: -30,
-                opacity: 0,
-                filter: "blur(8px)",
-                ease: "power1.inOut"
-            }, 0);
+                gsap.timeline({
+                    defaults: { ease: "none" },
+                    scrollTrigger: {
+                        trigger: track,
+                        start: "top top",
+                        end: "+=800",
+                        scrub: 0.65,
+                        invalidateOnRefresh: true,
+                        fastScrollEnd: true
+                    }
+                })
+                    .fromTo(
+                        title.words,
+                        { y: 0, opacity: 1, filter: "blur(0px)" },
+                        {
+                            y: -60,
+                            opacity: 0,
+                            filter: "blur(12px)",
+                            stagger: 0.02,
+                            immediateRender: false
+                        },
+                        0
+                    )
+                    .fromTo(
+                        subtitle.lines,
+                        { y: 0, opacity: 1, filter: "blur(0px)" },
+                        {
+                            y: -40,
+                            opacity: 0,
+                            filter: "blur(10px)",
+                            stagger: 0.02,
+                            immediateRender: false
+                        },
+                        0
+                    )
+                    .fromTo(
+                        [".hero-badge", "#hero-actions"],
+                        { y: 0, opacity: 1, filter: "blur(0px)" },
+                        {
+                            y: -30,
+                            opacity: 0,
+                            filter: "blur(8px)",
+                            immediateRender: false
+                        },
+                        0
+                    );
+
+                ScrollTrigger.refresh();
+            };
             // 8. Animações de Entrada e Saída da Seção 2
             // Estado inicial invisível
             gsap.set('.feature-anim-y', { y: 50, opacity: 0 });
