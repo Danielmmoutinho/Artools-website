@@ -1,367 +1,1281 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura Pen | Edição Limitada</title>
+    <title>Caneta Edição Limitada — ARTOOLS System v6</title>
 
-    <!-- Tailwind Play CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
-                    },
-                    colors: {
-                        base: '#EAEAE5',
-                        surface: '#FFFFFF',
-                        accent: '#11100F',
-                        muted: '#8E8B85',
-                        border: '#D6D5CF',
-                    },
-                    boxShadow: {
-                        premium: '0 4px 60px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0,0,0,0.02)',
-                        glow: '0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255,255,255,0.7)',
-                    }
-                }
-            }
-        }
-    </script>
-
-    <!-- Google Fonts conforme Design System 7.0 -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- Iconify para os ícones duotone/linear exigidos no DS -->
+    <!-- Iconify -->
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 
-    <!-- Bibliotecas de Animação e Scroll Avançado -->
+    <style>
+        /* Design Tokens baseados no design_system6.html */
+        :root {
+            --color-bg: #FFFFFF;
+            --color-text: #1C1C1C;
+            --color-text-muted: #9B9B9B;
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'Space Mono', 'Courier New', monospace;
+            --radius-full: 9999px;
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow-glow: 0 0 40px rgba(28,28,28,0.12);
+            --shadow-btn: 0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        ::selection {
+            background-color: #E0E0DA;
+            color: #1C1C1C;
+        }
+
+        .global-noise {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Ocultando a scrollbar original já que usaremos Lenis */
+        body::-webkit-scrollbar { display: none; } 
+
+        /* =============================================
+           NAVBAR
+        ============================================= */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 50;
+            padding: 1.5rem 6vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.8s var(--ease-smooth), background 0.3s, backdrop-filter 0.3s;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            color: #fff;
+        }
+        .navbar.visible { opacity: 1; }
+        .navbar.scrolled {
+            background: rgba(10,10,10,0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 1rem 6vw; /* Encolhe levemente */
+        }
+        
+        .nav-logo {
+            font-weight: 900;
+            font-size: 1.25rem;
+            letter-spacing: -0.04em;
+        }
+        
+        .nav-links {
+            display: none; /* Mobile first hidden */
+        }
+        @media (min-width: 768px) {
+            .nav-links {
+                display: flex;
+                gap: 2.5rem;
+                font-size: 0.75rem;
+                font-weight: 600;
+                font-family: var(--font-mono);
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+            }
+        }
+        .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #fff; }
+
+        /* =============================================
+           BOTÕES E CTA
+        ============================================= */
+        .btn-primary {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            color: #1C1C1C;
+            border-radius: var(--radius-full);
+            padding: 0.875rem 2.2rem;
+            font-size: 0.875rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s;
+            box-shadow: var(--shadow-btn);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255,255,255,0.25);
+        }
+        .btn-primary .shimmer {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.06), transparent);
+            transform: skewX(-15deg) translateX(-150%);
+            animation: shimmerEffect 2s continuous infinite;
+        }
+        @keyframes shimmerEffect {
+            0% { transform: skewX(-15deg) translateX(-150%); }
+            50%, 100% { transform: skewX(-15deg) translateX(150%); }
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #fff;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-decoration: none;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: opacity 0.3s;
+        }
+        .btn-secondary::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: #fff;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s var(--ease-smooth);
+        }
+        .btn-secondary:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        .btn-secondary:hover { opacity: 0.85; }
+
+        /* =============================================
+           LAYOUT DA HERO SECTION (PARALLAX SCRUB)
+        ============================================= */
+        .hero-track {
+            height: 400vh; /* Altura total para mapear o scroll */
+            background: #000;
+            position: relative;
+        }
+        .hero-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        /* =============================================
+           VÍDEO DE FUNDO E OVERLAY
+        ============================================= */
+        .hero-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            pointer-events: none;
+            z-index: 1;
+            will-change: transform;
+            transform: translateZ(0); 
+            opacity: 0.95;
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 55%, transparent 100%);
+            z-index: 2;
+        }
+
+        /* =============================================
+           CONTEÚDO DA HERO
+        ============================================= */
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            padding: 0 6vw;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        /* Badge Animado */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 1rem;
+            border-radius: var(--radius-full);
+            font-size: 0.7srem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            animation: pulseBadge 2.5s infinite ease-in-out;
+            will-change: transform;
+        }
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,255,255,0); }
+            50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,255,255,0.15); }
+        }
+
+        /* Tipografia */
+        .hero-title {
+            font-size: clamp(3.5rem, 8vw, 6.5rem);
+            font-weight: 900;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+            max-width: 800px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hero-title .highlight {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.8);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .hero-subtitle {
+            font-size: clamp(1rem, 1.5vw, 1.25rem);
+            line-height: 1.6;
+            color: rgba(255,255,255,0.8);
+            max-width: 480px;
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        /* Ajustes SplitType */
+        .line { overflow: hidden; padding-bottom: 0.2rem; }
+        .word { will-change: transform, opacity; }
+
+        /* =============================================
+           CURSOR CUSTOMIZADO (Extra Polish)
+        ============================================= */
+        @media (pointer: fine) {
+            body { cursor: none; }
+            .custom-cursor {
+                position: fixed;
+                top: 0; left: 0;
+                width: 20px; height: 20px;
+                border-radius: 50%;
+                background: #fff;
+                mix-blend-mode: difference;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+                transition: width 0.3s, height 0.3s, background 0.3s, border 0.3s;
+                will-change: transform;
+            }
+            .custom-cursor.hover {
+                width: 50px; height: 50px;
+                background: transparent;
+                border: 1.5px solid #fff;
+            }
+        }
+
+        /* =============================================
+           SEÇÃO 2: ENGENHARIA E PERFORMANCE
+        ============================================= */
+        .feature-section {
+            position: relative;
+            z-index: 10;
+            background: #FFFFFF;
+            color: #1C1C1C;
+            padding: 8rem 6vw;
+            border-top: 1px solid #E0E0DA;
+            min-height: 100vh;
+        }
+
+        .grid-bg-dark {
+            background-image:
+                linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .feature-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-header {
+            margin-bottom: 6rem;
+        }
+        .feature-title {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin-bottom: 1rem;
+        }
+        .feature-desc {
+            color: var(--color-text-secondary);
+            font-size: 1.125rem;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        @media (min-width: 1024px) {
+            .feature-grid {
+                grid-template-columns: 1.2fr 1fr;
+                gap: 6rem;
+            }
+        }
+
+        .feature-image-wrapper {
+            position: relative;
+            padding: 1rem;
+            border-radius: 2rem;
+            border: 1px solid #E0E0DA;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+            display: block;
+        }
+        .feature-image-wrapper::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.02), transparent);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .feature-image-wrapper:hover::after { opacity: 1; }
+        .feature-image-wrapper img {
+            width: 100%;
+            height: auto;
+            border-radius: 1.25rem;
+            display: block;
+            object-fit: cover;
+            transition: transform 1.5s var(--ease-smooth);
+        }
+        .feature-image-wrapper:hover img {
+            transform: scale(1.05);
+        }
+        .glow-node {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px; height: 400px;
+            background: #1C1C1C;
+            filter: blur(120px);
+            border-radius: 50%;
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 0;
+            animation: pulseGlow 6s ease-in-out infinite alternate;
+        }
+        @keyframes pulseGlow {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.04; }
+            100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.12; }
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .feature-item {
+            position: relative;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            padding: 2rem;
+            border-radius: 1rem;
+            border: 1px solid transparent;
+            background: transparent;
+            transition: all 0.4s var(--ease-smooth);
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .feature-item::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(350px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(28,28,28,0.035), transparent 40%);
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            z-index: 0;
+            border-radius: inherit;
+        }
+        .feature-item:hover {
+            border-color: #E0E0DA;
+            background: #FFFFFF;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+        }
+        .feature-item:hover::before { opacity: 1; }
+        .feature-item-content { position: relative; z-index: 10; }
+        .feature-number {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 1px solid #E0E0DA;
+            background: #F5F5F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: #6B6B6B;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+            transition: all 0.5s var(--ease-smooth);
+        }
+        .feature-item:hover .feature-number {
+            background: #1C1C1C;
+            color: #fff;
+            border-color: #1C1C1C;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* shadow-md do DS */
+        }
+        .feature-item-content h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        .feature-item-content p {
+            color: #6B6B6B;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        /* Tag com Shimmer / Beam da identidade textual */
+        .feature-tag {
+            position: relative;
+            display: inline-block;
+            margin-left: 0.4rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            background: #1C1C1C;
+            font-size: 0.65rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #fff;
+            vertical-align: middle;
+            overflow: hidden;
+        }
+        .feature-tag::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            transform: skewX(-15deg);
+            transition: left 0.6s var(--ease-smooth);
+        }
+        .feature-item:hover .feature-tag::before {
+            left: 140%;
+            transition-delay: 0.1s;
+        }
+
+        /* Float Anim p/ Imagem principal */
+        @keyframes subtleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        .subtle-float {
+            animation: subtleFloat 6s ease-in-out infinite;
+        }
+
+        /* Marquee Custom */
+        @keyframes marqueeScroll {
+            from { transform: translateX(0); }
+            to   { transform: translateX(-50%); }
+        }
+        .marquee-container {
+            display: flex;
+            overflow: hidden;
+            user-select: none;
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 1rem 0;
+            border-bottom: 1px solid #E0E0DA;
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        .marquee-content {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            min-width: 100%;
+            animation: marqueeScroll 25s linear infinite;
+        }
+        .marquee-item {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #1C1C1C;
+            font-weight: 600;
+            padding: 0 2rem;
+            white-space: nowrap;
+        }
+        .marquee-dot {
+            color: #9B9B9B;
+        }
+
+        /* Ghost Background Text Parallax */
+        .ghost-bg-text {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(8rem, 25vw, 30rem);
+            font-weight: 900;
+            letter-spacing: -0.06em;
+            line-height: 0.85;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(28,28,28,0.03);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 0;
+            user-select: none;
+        }
+
+        /* =============================================
+           SEÇÃO 3: GALERIA HORIZONTAL (O ECOSSISTEMA)
+        ============================================= */
+        .gallery-section {
+            background: #0A0A0A;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+        .gallery-wrapper {
+            display: flex;
+            width: 300vw;
+            height: 100vh;
+        }
+        .gallery-panel {
+            width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .gallery-bg-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+            transition: opacity 0.5s;
+        }
+        .gallery-panel:hover .gallery-bg-img { opacity: 0.7; }
+        
+        .gallery-content {
+            position: relative;
+            z-index: 10;
+            max-width: 900px;
+            padding: 0 5vw;
+            text-align: center;
+        }
+        .gallery-title {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 10px 40px rgba(0,0,0,0.9);
+        }
+        .gallery-desc {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            margin: 0 auto;
+            max-width: 650px;
+            text-shadow: 0 5px 20px rgba(0,0,0,0.9);
+        }
+
+        /* =============================================
+           SEÇÃO 4: CTA FINAL C/ BEAM GLOW
+        ============================================= */
+        .cta-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #000;
+        }
+        .cta-video-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.35; /* Escuro para destacar o box */
+            pointer-events: none;
+        }
+        
+        .glow-box-wrapper {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(1);
+            transition: transform 0.5s var(--ease-smooth);
+        }
+        .glow-box-wrapper:hover {
+            transform: scale(1.02);
+        }
+
+        /* Outer Glow blur that fades in on hover */
+        .glow-outer-blur {
+            position: absolute;
+            inset: -30px;
+            background: rgba(255,255,255,0.12);
+            filter: blur(50px);
+            opacity: 0;
+            transition: opacity 0.5s var(--ease-smooth);
+            border-radius: 2.5rem;
+            pointer-events: none;
+        }
+        .glow-box-wrapper:hover .glow-outer-blur {
+            opacity: 1;
+        }
+
+        /* Animating borderline / beam container */
+        .beam-box {
+            position: relative;
+            overflow: hidden;
+            border-radius: 2rem;
+            padding: 1.5px; /* Define a espessura da borda animada */
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Spinning conic gradient border */
+        @keyframes spinBeam {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+        .beam-box::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 250%;
+            height: 250%;
+            background: conic-gradient(from 0deg, transparent 0, transparent 280deg, #FFFFFF 360deg);
+            animation: spinBeam 3s linear infinite;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            opacity: 0; /* Começa oculto */
+            transition: opacity 0.5s var(--ease-smooth);
+        }
+        .glow-box-wrapper:hover .beam-box::before {
+            opacity: 1;
+        }
+
+        /* Inner Content of the Box (Glassmorphism solid) */
+        .beam-box-inner {
+            position: relative;
+            z-index: 1;
+            background: #0A0A0A;
+            border-radius: 2rem;
+            padding: 4rem 3rem;
+            text-align: center;
+            max-width: 550px;
+        }
+
+        .cta-title {
+            color: #FFF;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.04em;
+        }
+        .cta-text {
+            color: #9B9B9B;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        /* =============================================
+           MOBILE RESPONSIVENESS OVERRIDES
+        ============================================= */
+        @media (max-width: 768px) {
+            /* Navbar */
+            .navbar { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            
+            /* Hero Section */
+            .hero-video { object-position: 65% center; }
+            .hero-title { font-size: 3rem; }
+            .hero-subtitle { font-size: 1rem; }
+            .hero-content { padding: 0 1.5rem; max-width: 100%; bottom: 8vh; }
+            .hero-actions { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .hero-actions .btn-primary { padding: 0.8rem 2rem; font-size: 0.95rem; }
+            .video-overlay {
+                background: linear-gradient(90deg, rgba(28,28,28,0.95) 0%, rgba(28,28,28,0.6) 60%, transparent 100%);
+            }
+
+            /* Section 2: Features */
+            .feature-section { padding: 4rem 1.5rem; }
+            .feature-header { margin-bottom: 3rem; }
+            .feature-title { font-size: 2.5rem; }
+            .feature-desc { font-size: 1rem; }
+            .feature-grid { grid-template-columns: 1fr; gap: 3rem; }
+            .feature-item { padding: 1.5rem 1rem; }
+            .marquee-item { font-size: 0.6rem; padding: 0 1rem; }
+            .ghost-bg-text { font-size: 5rem; top: 30%; }
+            .feature-image-wrapper { margin-top: 1rem; }
+
+            /* Section 3: Gallery (Horiz Scroll) */
+            .gallery-title { font-size: 2.5rem; margin-bottom: 1rem; }
+            .gallery-desc { font-size: 1rem; }
+            .gallery-content { padding: 0 1.5rem; }
+
+            /* Section 4: CTA */
+            .cta-section { align-items: flex-end; padding-bottom: 3rem; }
+            .cta-video-bg { object-position: 65% center; }
+            .beam-box-inner { padding: 1.5rem; }
+            .cta-title { font-size: 1.8rem; }
+            .cta-text { font-size: 0.95rem; margin-bottom: 1.5rem; }
+            .cta-section .btn-primary { padding: 1rem 1.5rem; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Película Global de Ruído Analógico -->
+    <div class="global-noise"></div>
+
+    <!-- Cursor Customizado -->
+    <div class="custom-cursor bg-white" id="cursor"></div>
+
+    <!-- Navegação -->
+    <header class="navbar" id="navbar">
+        <div class="nav-logo cursor-hover">ARTOOLS</div>
+        <nav class="nav-links">
+            <a href="#" class="cursor-hover">A Caneta</a>
+            <a href="#" class="cursor-hover">Design</a>
+            <a href="#" class="cursor-hover">Especificações</a>
+        </nav>
+        <button class="btn-primary cursor-hover" style="padding: 0.6rem 1.5rem; font-size: 0.75rem;">
+            Comprar Agora
+            <div class="shimmer"></div>
+        </button>
+    </header>
+
+    <!-- Parallax Hero Track -->
+    <section class="hero-track" id="hero-track">
+        <div class="hero-sticky" id="hero-section">
+            
+            <!-- Video Background - Scrub Effect -->
+            <video 
+                id="hero-video" 
+                class="hero-video" 
+                src="assets/videos/MeuVideo.mp4" 
+                muted 
+                playsinline 
+                preload="auto">
+            </video>
+            
+            <!-- Overlay escuro esquerdo para leitura -->
+            <div class="video-overlay"></div>
+
+            <!-- Conteúdo em bloco esquerdo -->
+            <div class="hero-content">
+                <div class="hero-badge cursor-hover">
+                    <span>✦</span> Edição Limitada
+                </div>
+                
+                <h1 class="hero-title" id="hero-title">
+                    A caneta que <br>
+                    <span class="highlight">redefine</span> o escrever
+                </h1>
+                
+                <p class="hero-subtitle" id="hero-subtitle">
+                    Precisão milimétrica, design que dura gerações.<br>
+                    Cada traço, uma declaração.
+                </p>
+
+                <div class="hero-actions" id="hero-actions">
+                    <button class="btn-primary cursor-hover" style="font-size: 1rem; padding: 1rem 2.5rem;">
+                        Adquirir Agora
+                        <div class="shimmer"></div>
+                    </button>
+                    <a href="#" class="btn-secondary cursor-hover">
+                        <iconify-icon icon="solar:play-bold" class="text-xl"></iconify-icon>
+                        Ver em ação
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO 2: Neural Architecture / Engenharia -->
+    <section class="feature-section grid-bg-dark" id="features">
+        
+        <!-- Ghost Text (Parallax Overlay) -->
+        <div class="ghost-bg-text parallax-ghost">PRECISÃO</div>
+        
+        <!-- Marquee Divider -->
+        <div class="marquee-container">
+            <div class="marquee-content">
+                <span class="marquee-item">Alumínio Aeroespacial</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Engenharia Suíça</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Tolerância Zero</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Precisão Absoluta</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Grade 5 Titan</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Fricção Zero</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Alumínio Aeroespacial</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Engenharia Suíça</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Tolerância Zero</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Precisão Absoluta</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Grade 5 Titan</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Fricção Zero</span><span class="marquee-dot">✦</span>
+            </div>
+            <div class="marquee-content" aria-hidden="true">
+                <span class="marquee-item">Alumínio Aeroespacial</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Engenharia Suíça</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Tolerância Zero</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Precisão Absoluta</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Grade 5 Titan</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Fricção Zero</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Alumínio Aeroespacial</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Engenharia Suíça</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Tolerância Zero</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Precisão Absoluta</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Grade 5 Titan</span><span class="marquee-dot">✦</span>
+                <span class="marquee-item">Fricção Zero</span><span class="marquee-dot">✦</span>
+            </div>
+        </div>
+
+        <div class="feature-container relative z-10" style="padding-top: 6rem;">
+            
+            <div class="feature-header feature-anim-y">
+                <h2 class="feature-title">Engenharia Aeroespacial</h2>
+                <p class="feature-desc">Nossa arquitetura patenteada sincroniza esferas magnéticas de precisão sob demanda. Construída sobre uma malha ultraleve incrivelmente resistente para fluidez absoluta em tempo real.</p>
+            </div>
+
+            <div class="feature-grid">
+                
+                <!-- Esq: Image Card -->
+                <div class="relative feature-anim-scale subtle-float">
+                    <div class="glow-node"></div>
+                    <div class="feature-image-wrapper">
+                        <img src="assets/images/tech_pen.png" alt="Engenharia da Caneta">
+                    </div>
+                </div>
+
+                <!-- Dir: Lista -->
+                <div class="feature-list">
+                    
+                    <div class="feature-item feature-anim-x hover-target">
+                        <div class="feature-number">01</div>
+                        <div class="feature-item-content">
+                            <h3>Balanço Computacional</h3>
+                            <p>O centro de gravidade age sob as regras da física de borda. O peso ideal massificado na extremidade garante latência nula em contato com o papel. <span class="feature-tag">Zero Fricção</span></p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item feature-anim-x hover-target">
+                        <div class="feature-number">02</div>
+                        <div class="feature-item-content">
+                            <h3>Ligas de Grau Suíço</h3>
+                            <p>A estrutura base é unificada atomicamente em alumínio de grau espacial. Absorção máxima de micro-impactos do uso diário, finalizada com precisão sem emendas e tolerância micrométrica.</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item feature-anim-x hover-target">
+                        <div class="feature-number">03</div>
+                        <div class="feature-item-content">
+                            <h3>Mesh Auto-Reparável</h3>
+                            <p>Mecanismos telescópicos suportam fluxo contínuo. Caso caia e aponte pressão direta, a câmara interna redireciona o escoamento, contendo tintas com isolamento esferográfico zero falhas.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SEÇÃO 3: Galeria Horizontal -->
+    <section class="gallery-section" id="gallery-container">
+        <div class="gallery-wrapper" id="gallery-wrapper">
+            
+            <!-- Panel 1 -->
+            <div class="gallery-panel" style="background: #050505;">
+                <img src="assets/images/gallery_blueprint.png" class="gallery-bg-img" alt="Gallery Blueprint">
+                <div class="gallery-content">
+                    <h2 class="gallery-title gallery-anim">A Base da Criação</h2>
+                    <p class="gallery-desc gallery-anim">Toda grande estrutura começa com um rascunho perfeito. O fluxo constante de tinta adaptativa permite que grandes mentes projetem sem interrupções sob qualquer inclinação.</p>
+                </div>
+            </div>
+
+            <!-- Panel 2 -->
+            <div class="gallery-panel" style="background: #020202;">
+                <img src="assets/images/gallery_notebook.png" class="gallery-bg-img" alt="Gallery Notebook">
+                <div class="gallery-content">
+                    <h2 class="gallery-title gallery-anim">Herança Viva</h2>
+                    <p class="gallery-desc gallery-anim">Um instrumento desenhado para transcender gerações. A química perfeita entre o peso da liga aeroespacial e a fluidez analógica em mãos exigentes.</p>
+                </div>
+            </div>
+
+            <!-- Panel 3 -->
+            <div class="gallery-panel" style="background: #0A0A0A;">
+                <img src="assets/images/gallery_tip.png" class="gallery-bg-img" alt="Gallery Tip">
+                <div class="gallery-content">
+                    <h2 class="gallery-title gallery-anim">Mestria do Fluxo</h2>
+                    <p class="gallery-desc gallery-anim">Com o inovador canal de tungstênio, a ARTOOLS garante o fim da gravidade. Escrita fluida, milimetrada e inabalável que nunca falha, sob nenhuma pressão.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SEÇÃO 4: CTA FINAL C/ Glow Beam -->
+    <section class="cta-section" id="cta-final">
+        <!-- Background Video -->
+        <video class="cta-video-bg" autoplay muted loop playsinline>
+            <source src="assets/videos/MeuVideo.mp4" type="video/mp4">
+        </video>
+        
+        <div class="glow-box-wrapper cursor-hover">
+            <div class="glow-outer-blur"></div>
+            
+            <div class="beam-box">
+                <div class="beam-box-inner">
+                    <span class="feature-tag mb-4 inline-block" style="margin-left: 0; padding: 0.35rem 0.8rem; font-size: 0.75rem;">Acesso Antecipado</span>
+                    <h2 class="cta-title">Sua Marca no Tempo.</h2>
+                    <p class="cta-text">A Artools Limitada é desenhada para visionários. As inscrições para o próximo lote estão abertas sob extrema restrição.</p>
+                    
+                    <button class="btn-primary cursor-hover" style="font-size: 1.1rem; padding: 1.2rem 3.5rem;">
+                        Reservar Unidade
+                        <div class="shimmer"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
 
-    <style>
-        /* CSS Variables & Tokens do Design System 7.0 */
-        :root {
-            --color-base: #EAEAE5;
-            --color-surface: #FFFFFF;
-            --color-surface-glass: rgba(255, 255, 255, 0.1);
-            --color-accent: #11100F;
-            --color-muted: #8E8B85;
-            --color-border: #D6D5CF;
-
-            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
-            --shadow-premium: 0 4px 60px rgba(0, 0, 0, 0.03), 0 2px 4px rgba(0,0,0,0.02);
-            --shadow-glow: 0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 0 1px rgba(255,255,255,0.7);
-        }
-
-        body {
-            background-color: var(--color-base);
-            color: var(--color-accent);
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            /* Cursor Clean-Tech Default */
-            cursor: default;
-        }
-
-        /* -------------------------------------------------------------------------
-           Integração base do Lenis para sobrescrever nativos indesejados
-        -------------------------------------------------------------------------- */
-        html.lenis, html.lenis body {
-            height: auto;
-        }
-        .lenis.lenis-smooth {
-            scroll-behavior: auto !important;
-        }
-        .lenis.lenis-smooth [data-lenis-prevent] {
-            overscroll-behavior: contain;
-        }
-        .lenis.lenis-stopped {
-            overflow: hidden;
-        }
-
-        /* -------------------------------------------------------------------------
-           Utilities do Design System 7.0 (Glass, Beam Btn, Blend)
-        -------------------------------------------------------------------------- */
-        .glass-panel {
-            background: var(--color-surface-glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        /* O botão Beam adaptado para cenário escuro/vídeo mantendo a assinatura */
-        .beam-btn {
-            position: relative;
-            overflow: hidden;
-            background: #FFFFFF;
-            color: var(--color-accent);
-            transition: all 0.4s var(--ease-smooth);
-            will-change: transform;
-            transform: translateZ(0); 
-        }
-        .beam-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -150%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(0,0,0,0.08), transparent);
-            transform: skewX(-20deg);
-            z-index: 10;
-            animation: beamShimmerLoop 3s infinite;
-        }
-        @keyframes beamShimmerLoop {
-            0% { left: -150%; }
-            15% { left: 150%; }
-            100% { left: 150%; }
-        }
-
-        /* Destaque cromático de blend difference (Signature do DS) */
-        .text-keyword-highlight {
-            color: var(--color-surface); /* Palavra-chave em cor branca pura */
-            font-weight: 700;
-        }
-
-        /* Split-Type inicial states for chars */
-        .char {
-            transform: translateY(115%);
-            will-change: transform;
-        }
-
-        /* Gradient mask para o container de vídeo para imersão perfeita com a section de baixo */
-        .hero-video-container {
-            mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-        }
-        
-    </style>
-</head>
-<body class="selection:bg-white selection:text-black">
-
-    <!-- ==============================================
-         NAVBAR (Fixo, Glassmorphism, Entrance delay)
-    ================================================ -->
-    <nav class="fixed top-0 left-0 w-full z-50 px-6 py-5 glass-panel flex justify-between items-center opacity-0 nav-reveal" style="transform: translateY(-20px);">
-        <!-- Logo -->
-        <div class="flex items-center gap-2 text-white group cursor-pointer hover:opacity-80 transition-opacity">
-            <iconify-icon class="text-2xl text-white group-hover:rotate-180 transition-transform duration-[1.2s] ease-[cubic-bezier(0.34,1.56,0.64,1)]" icon="solar:pen-new-square-bold-duotone"></iconify-icon>
-            <span class="font-bold tracking-tighter text-lg uppercase mix-blend-difference">Aura</span>
-        </div>
-        
-        <!-- Links -->
-        <div class="hidden md:flex absolute left-1/2 -translate-x-1/2 gap-10 items-center text-xs font-mono uppercase tracking-[0.2em] text-white/50">
-            <a href="#" class="hover:text-white transition-colors">Manifesto</a>
-            <a href="#" class="hover:text-white transition-colors">Engenharia</a>
-            <a href="#" class="hover:text-white transition-colors">Galeria</a>
-        </div>
-
-        <!-- CTA Nav -->
-        <button class="px-6 py-2.5 bg-white/10 border border-white/20 text-white rounded-full text-[10px] font-mono font-bold uppercase tracking-widest hover:bg-white hover:text-accent transition-colors duration-500 glass-panel backdrop-blur-md">
-            Comprar Agora
-        </button>
-    </nav>
-
-    <!-- ==============================================
-         HERO SECTION (Apple Scrub Parallax System)
-         400vh altura para permitir espaço de scroll
-    ================================================ -->
-    <section id="hero-section" class="relative h-[400vh] bg-[#080808]">
-        
-        <!-- Posição Sticky (prende a tela e renderiza a lógica visual) -->
-        <div class="sticky top-0 h-screen w-full overflow-hidden flex items-center">
-            
-            <!-- Video Background (object-cover, GPU accelerada) -->
-            <div class="absolute inset-0 z-0 hero-video-container">
-                <video id="hero-video" 
-                       src="artools/assets/raw_files/MeuVideo.mp4" 
-                       class="w-full h-full object-cover opacity-[0.85]" 
-                       muted playsinline preload="auto" 
-                       style="pointer-events: none; transform: translateZ(0); will-change: transform, filter;"></video>
-                       
-                <!-- Overlay Gradient para garantir leitura -->
-                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-[#080808]/10"></div>
-                <!-- Ambient Glow Behind Text -->
-                <div class="absolute top-[30%] left-[-10%] w-[500px] h-[500px] bg-white/5 blur-[120px] rounded-full pointer-events-none"></div>
-            </div>
-
-            <!-- Foreground Content Grid -->
-            <div class="relative z-10 w-full max-w-[1440px] mx-auto px-6 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
-                
-                <!-- Coluna Esquerda: Textos / CTA -->
-                <div class="col-span-1 lg:col-span-6 xl:col-span-5 flex flex-col justify-center h-full pt-16">
-                    
-                    <!-- Badge Animado Loop -->
-                    <div class="mb-10 w-fit opacity-0 badge-anim" style="transform: translateY(10px);">
-                        <span class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-white/15 bg-white/[0.03] backdrop-blur-md text-white text-[10px] font-mono tracking-[0.2em] uppercase badge-bounce">
-                            <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_12px_#ffffff]"></span>
-                            ✦ Edição Limitada
-                        </span>
-                    </div>
-
-                    <!-- Headline (GSAP SplitType Letter by Letter) -->
-                    <h1 class="text-[3.5rem] sm:text-[4.5rem] md:text-[5.5rem] font-medium tracking-tighter leading-[0.95] text-white/90 mb-8 headline-anim">
-                        A caneta que<br>
-                        <span class="text-keyword-highlight italic pr-2">redefine</span>o escrever
-                    </h1>
-
-                    <!-- Descrição / Subtitle -->
-                    <p class="text-base sm:text-lg text-white/60 max-w-sm font-light leading-[1.8] mb-12 opacity-0 subtitle-anim" style="transform: translateY(20px);">
-                        Precisão milimétrica, design que dura gerações. Cada traço, uma declaração absoluta de intenção.
-                    </p>
-
-                    <!-- Actions Layer -->
-                    <div class="flex gap-4 flex-wrap opacity-0 buttons-anim" style="transform: translateY(20px);">
-                        <button class="beam-btn px-8 py-4 rounded-full font-medium text-sm flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(255,255,255,0.15)] hover:scale-105 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]">
-                            Adquirir Agora
-                            <iconify-icon icon="solar:arrow-right-linear" class="text-lg opacity-80"></iconify-icon>
-                        </button>
-                        
-                        <button class="px-8 py-4 border border-white/15 text-white/80 hover:text-white rounded-full font-medium text-sm flex items-center justify-center gap-3 hover:bg-white/[0.08] hover:border-white/30 transition-all duration-300 glass-panel">
-                            <iconify-icon icon="solar:play-circle-bold-duotone" class="text-xl"></iconify-icon>
-                            Ver em ação
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Coluna Direita: Vazia p/ foco total no vídeo -->
-                <div class="col-span-1 lg:col-span-6 xl:col-span-7 hidden lg:block"></div>
-
-            </div>
-            
-            <!-- Scroll Indicator -->
-            <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 opacity-0 scroll-indic-anim">
-                <span class="text-[9px] font-mono uppercase tracking-[0.3em] text-white/30">Scroll to Explore</span>
-                <div class="w-[1px] h-12 bg-white/10 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-full bg-white/80 origin-top animate-[scaleYDown_2s_infinite]"></div>
-                </div>
-            </div>
-            <!-- Animação do tracejado vertical de scroll -->
-            <style>
-                @keyframes scaleYDown {
-                    0% { transform: scaleY(0); transform-origin: top; }
-                    50% { transform: scaleY(1); transform-origin: top; }
-                    50.1% { transform: scaleY(1); transform-origin: bottom; }
-                    100% { transform: scaleY(0); transform-origin: bottom; }
-                }
-            </style>
-        </div>
-    </section>
-
-    <!-- ==============================================
-         CONTINUAÇÃO (Mock Section de Transição)
-    ================================================ -->
-    <section class="min-h-[50vh] bg-base py-32 px-6 flex items-center justify-center border-t border-black/5 relative z-20">
-        <div class="text-center max-w-2xl mx-auto gs-fade-up">
-            <span class="inline-block w-8 h-px bg-accent mb-6"></span>
-            <h2 class="text-4xl md:text-5xl font-medium tracking-tight mb-6 text-accent">Engenharia Perfeita.</h2>
-            <p class="text-muted leading-relaxed font-light text-lg">O vídeo avançou de acordo com o seu fluxo. O layout do Design System 7.0 garante as transições mais puras e fluidas.</p>
-        </div>
-    </section>
-
-    <!-- ==============================================
-         LÓGICA CORE: Animações, Video Scrub, Scroll
-    ================================================ -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener("DOMContentLoaded", () => {
             
-            // 1. INICIALIZAÇÃO LENIS (SMOOTH SCROLL HD)
+            // 1. Cursor Customizado (Animação Suave)
+            const cursor = document.getElementById('cursor');
+            if (window.matchMedia("(pointer: fine)").matches) {
+                let mouseX = window.innerWidth / 2;
+                let mouseY = window.innerHeight / 2;
+                let cursorX = mouseX;
+                let cursorY = mouseY;
+                
+                // Cursor interpolação 1D via GSAP Ticker
+                gsap.ticker.add(() => {
+                    cursorX += (mouseX - cursorX) * 0.15;
+                    cursorY += (mouseY - cursorY) * 0.15;
+                    if(cursor) {
+                        cursor.style.transform = `translate(${cursorX}px, ${cursorY}px) translate(-50%, -50%)`;
+                    }
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                });
+
+                // Efeito Hover em elementos clicáveis
+                const hoverElements = document.querySelectorAll('.cursor-hover, a, button');
+                hoverElements.forEach(el => {
+                    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                });
+            }
+
+            // 2. Lenis Smooth Scroll Setup
             const lenis = new Lenis({
-                autoRaf: false,  // GSAP Ticker controller
-                duration: 1.5,   // Mais suave ainda
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smooth: true,
             });
 
-            // Sincronizando Lenis + GSAP perfeitamente
-            gsap.registerPlugin(ScrollTrigger);
-            
-            lenis.on('scroll', ScrollTrigger.update);
-            
-            gsap.ticker.add((time) => {
-                lenis.raf(time * 1000);
+            lenis.on('scroll', (e) => {
+                ScrollTrigger.update();
+                const nav = document.getElementById('navbar');
+                if (nav) {
+                    if (e.scroll > 50) {
+                        nav.classList.add('scrolled');
+                    } else {
+                        nav.classList.remove('scrolled');
+                    }
+                }
             });
+            gsap.ticker.add((time) => { lenis.raf(time * 1000); });
             gsap.ticker.lagSmoothing(0);
 
-            // 2. TIMELINE DA HERO SECTION (Entrance animations)
-            const headlineSplit = new SplitType('.headline-anim', { types: 'chars, words' });
-            const tlInit = gsap.timeline({ defaults: { ease: 'expo.out' } });
+            // 3. Aparição Suave da Navbar
+            setTimeout(() => {
+                const nav = document.getElementById('navbar');
+                if(nav) nav.classList.add('visible');
+            }, 500);
 
-            tlInit.to('.nav-reveal', { opacity: 1, y: 0, duration: 1.5, delay: 0.2 })
-                  .to('.badge-anim', { opacity: 1, y: 0, duration: 1.2, ease: 'back.out(1.5)' }, '-=1')
-                  .to(headlineSplit.chars, { 
-                      y: '0%', 
-                      duration: 1.4, 
-                      stagger: 0.025, 
-                      ease: 'power4.out',
-                      onStart: () => gsap.set(headlineSplit.chars, { willChange: 'transform' }),
-                      onComplete: () => gsap.set(headlineSplit.chars, { willChange: 'auto' })
-                  }, '-=1.2')
-                  .to('.subtitle-anim', { opacity: 1, y: 0, duration: 1.5 }, '-=1.2')
-                  .to('.buttons-anim', { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' }, '-=1.3')
-                  .to('.scroll-indic-anim', { opacity: 1, duration: 2, ease: 'power2.inOut' }, '-=0.5');
+            // 4. Animações de Entrada Avançadas (SplitType + GSAP)
+            const title = new SplitType('#hero-title', { types: 'lines, words' });
+            const subtitle = new SplitType('#hero-subtitle', { types: 'lines' });
 
-            // Float constante do badge
-            gsap.to('.badge-bounce', {
-                y: -4,
-                duration: 2.5,
-                repeat: -1,
-                yoyo: true,
-                ease: 'sine.inOut'
+            // Estado inicial escondido
+            gsap.set(title.words, { y: 120, opacity: 0 });
+            gsap.set(subtitle.lines, { y: 40, opacity: 0 });
+            gsap.set('.hero-badge', { opacity: 0, y: 30 });
+            gsap.set('#hero-actions', { opacity: 0, y: 30 });
+
+            // Timeline de entrada Sequencial
+            const tl = gsap.timeline({ 
+                delay: 0.3,
+                onComplete: () => {
+                    // Libera o overflow da mask do SplitType para o Blur vazar limpo
+                    gsap.set('.line', { overflow: 'visible' });
+                }
             });
             
-            // Fade-up genérico
-            gsap.fromTo('.gs-fade-up', 
-                { opacity: 0, y: 40 }, 
-                { 
-                    opacity: 1, y: 0, duration: 1.2, ease: 'power3.out',
-                    scrollTrigger: {
-                        trigger: '.gs-fade-up', start: 'top 80%', toggleActions: 'play none none reverse'
-                    }
+            tl.to('.hero-badge', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            })
+            // Animando as palavras com stagger
+            .to(title.words, {
+                y: 0,
+                opacity: 1,
+                duration: 1,
+                stagger: 0.04,
+                ease: "power4.out"
+            }, "-=0.4")
+            // Subtítulo depois do título
+            .to(subtitle.lines, {
+                y: 0,
+                opacity: 1,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power3.out"
+            }, "-=0.6")
+            // Botões e Actions
+            .to('#hero-actions', {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out"
+            }, "-=0.4");
+
+            // 5. Animação de Saída (Fade + Blur) com progressão de Scroll
+            const exitTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#hero-track',
+                    start: "top top",
+                    end: "800px top",
+                    scrub: 1
                 }
-            );
+            });
 
-            // 3. VIDEO PARALLAX SCRUB (MUDANÇA PARA MOTOR NATIVO DO GSAP)
-            // Em vez de calcularmos via requestAnimationFrame manual que depende da CPU,
-            // vamos entregar a modulação do tempo para a timeline avançada do ScrollTrigger
-            const video = document.querySelector('#hero-video');
-            const section = document.querySelector('#hero-section');
+            exitTl.to(title.words, {
+                y: -60,
+                opacity: 0,
+                filter: "blur(12px)",
+                stagger: 0.02,
+                ease: "power1.inOut"
+            }, 0)
+            .to(subtitle.lines, {
+                y: -40,
+                opacity: 0,
+                filter: "blur(10px)",
+                stagger: 0.02,
+                ease: "power1.inOut"
+            }, 0)
+            .to(['.hero-badge', '#hero-actions'], {
+                y: -30,
+                opacity: 0,
+                filter: "blur(8px)",
+                ease: "power1.inOut"
+            }, 0);
 
-            // Pausa explícita obrigatória
-            video.pause();
+            // 6. Parallax Video Scrubbing (ScrollTrigger)
+            const video = document.getElementById('hero-video');
+            const track = document.getElementById('hero-track');
+            
+            let targetTime = 0;
+            let currentTime = 0;
+            let videoDuration = 0;
 
-            // Uma promessa que checa se o meta e o primeiro frame carregaram antes de iniciar o hook
-            let loaded = false;
-
-            video.addEventListener('loadeddata', () => {
-                if(loaded) return;
-                loaded = true;
-
-                // Animação de Scrubbing do GSAP puro
-                gsap.to(video, {
-                    currentTime: video.duration,
-                    ease: "none", // Progresso linear obrigatório (o lenis/scrub que dará suavidade)
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top top",
-                        end: () => "+=" + (section.offsetHeight - window.innerHeight),
-                        scrub: 0.8, // Valor numérico aplica um 'catch-up' super suave. (0.5 a 1s = muito natural)
+            const initVideoScrub = () => {
+                videoDuration = video.duration || 5; 
+                
+                ScrollTrigger.create({
+                    trigger: track,
+                    start: "top top",
+                    end: "bottom bottom",
+                    onUpdate: (self) => {
+                        targetTime = videoDuration * self.progress;
                     }
+                });
+
+                // Interpolação super suave usando RequestAnimationFrame
+                const renderVideoFrame = () => {
+                    if (video.readyState >= 2) { // 2 = HAVE_CURRENT_DATA
+                        // Interpolação linear (Lerp) de damping 0.1
+                        currentTime += (targetTime - currentTime) * 0.1;
+                        
+                        // Atualiza o tempo do player somente se a diferença for significativa
+                        if (Math.abs(currentTime - video.currentTime) > 0.01) {
+                            video.currentTime = currentTime;
+                        }
+                    }
+                    requestAnimationFrame(renderVideoFrame);
+                };
+                renderVideoFrame();
+            };
+
+            // Certifica-se de que o metadata foi carregado para termos o video.duration correto
+            if (video.readyState >= 1) { // 1 = HAVE_METADATA
+                initVideoScrub();
+            } else {
+                video.addEventListener('loadedmetadata', initVideoScrub);
+            }
+            // 7. Animações de Entrada e Saída da Seção 2
+            // Estado inicial invisível
+            gsap.set('.feature-anim-y', { y: 50, opacity: 0 });
+            gsap.set('.feature-anim-scale', { scale: 0.95, opacity: 0, filter: 'blur(8px)' });
+            gsap.set('.feature-anim-x', { x: 30, opacity: 0 });
+
+            ScrollTrigger.create({
+                trigger: '#features',
+                start: "top 75%",     // Aciona quando a nova dobra chegar em 75% da altura da tela
+                end: "bottom 30%",    // Limite da seção
+                // Play na descida, reverse se sair (tanto pra cima quanto pra baixo)
+                toggleActions: "play reverse play reverse", 
+                animation: gsap.timeline()
+                    .to('.feature-anim-y', { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' })
+                    .to('.feature-anim-scale', { scale: 1, opacity: 1, filter: 'blur(0px)', duration: 1, ease: 'power3.out' }, "-=0.4")
+                    .to('.feature-anim-x', { x: 0, opacity: 1, duration: 0.8, stagger: 0.15, ease: 'power2.out' }, "-=0.8")
+            });
+
+            // 8. Flashlight Effect Hover Listener
+            document.querySelectorAll('.feature-item').forEach(card => {
+                card.addEventListener('mousemove', e => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
                 });
             });
 
-            // Se o metadado carregar muito rápido do cache, força a emissão inicial
-            if (video.readyState >= 2) {
-                video.dispatchEvent(new Event('loadeddata'));
-            } else {
-                video.load();
-            }
+            // 9. Parallax Ghost Background Text
+            gsap.to('.parallax-ghost', {
+                yPercent: -40,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '#features',
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+
+            // 10. Horizontal Scroll Gallery
+            const galleryWrapper = document.getElementById("gallery-wrapper");
+            const panels = gsap.utils.toArray(".gallery-panel");
+
+            let scrollTween = gsap.to(panels, {
+                xPercent: -100 * (panels.length - 1),
+                ease: "none",
+                scrollTrigger: {
+                    trigger: "#gallery-container",
+                    pin: true,
+                    scrub: 1,
+                    end: () => "+=" + galleryWrapper.offsetWidth
+                }
+            });
+
+            // Animação de entrada dos textos sincronizada com a rolagem horizontal
+            panels.forEach((panel, i) => {
+                if (i === 0) return; // ignora o primeiro pois já carregou visivel
+                
+                const texts = panel.querySelectorAll('.gallery-anim');
+                gsap.from(texts, {
+                    y: 100,
+                    opacity: 0,
+                    duration: 1,
+                    stagger: 0.2,
+                    scrollTrigger: {
+                        trigger: panel,
+                        containerAnimation: scrollTween,
+                        start: "left 80%", 
+                        end: "right 20%",
+                        toggleActions: "play reverse play reverse"
+                    }
+                });
+            });
         });
     </script>
 </body>
