@@ -2,7 +2,7 @@
 <html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Caneta Edição Limitada — ARTOOLS System v6</title>
 
     <!-- Google Fonts -->
@@ -32,11 +32,21 @@
             margin: 0; padding: 0;
         }
 
+        html {
+            -webkit-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             font-family: var(--font-primary);
             background-color: var(--color-bg);
             color: var(--color-text);
-            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -67,9 +77,14 @@
             top: 0; left: 0; right: 0;
             z-index: 50;
             padding: 1.5rem 6vw;
+            padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));
+            padding-left: calc(6vw + env(safe-area-inset-left, 0px));
+            padding-right: calc(6vw + env(safe-area-inset-right, 0px));
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.75rem;
+            min-width: 0;
             opacity: 0;
             transition: opacity 0.8s var(--ease-smooth), background 0.3s, backdrop-filter 0.3s;
             background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
@@ -80,13 +95,24 @@
             background: rgba(10,10,10,0.8);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255,255,255,0.05);
-            padding: 1rem 6vw; /* Encolhe levemente */
+            padding: 1rem 6vw;
+            padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+            padding-left: calc(6vw + env(safe-area-inset-left, 0px));
+            padding-right: calc(6vw + env(safe-area-inset-right, 0px));
         }
         
         .nav-logo {
             font-weight: 900;
             font-size: 1.25rem;
             letter-spacing: -0.04em;
+            flex-shrink: 0;
+            min-width: 0;
+        }
+
+        .navbar .btn-primary.nav-cta {
+            flex-shrink: 1;
+            min-width: 0;
+            white-space: nowrap;
         }
         
         .nav-links {
@@ -187,6 +213,7 @@
             position: sticky;
             top: 0;
             height: 100vh;
+            height: 100dvh;
             width: 100%;
             overflow: hidden;
             display: flex;
@@ -229,6 +256,7 @@
             flex-direction: column;
             align-items: flex-start;
             gap: 1.5rem;
+            min-width: 0;
         }
 
         /* Badge Animado */
@@ -238,7 +266,7 @@
             gap: 0.5rem;
             padding: 0.4rem 1rem;
             border-radius: var(--radius-full);
-            font-size: 0.7srem;
+            font-size: 0.7rem;
             font-family: var(--font-mono);
             letter-spacing: 0.1em;
             text-transform: uppercase;
@@ -600,10 +628,12 @@
             display: flex;
             width: 300vw;
             height: 100vh;
+            height: 100dvh;
         }
         .gallery-panel {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -651,11 +681,14 @@
         .cta-section {
             position: relative;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             background: #000;
+            padding-left: env(safe-area-inset-left, 0px);
+            padding-right: env(safe-area-inset-right, 0px);
         }
         .cta-video-bg {
             position: absolute;
@@ -736,6 +769,9 @@
             padding: 4rem 3rem;
             text-align: center;
             max-width: 550px;
+            width: min(100%, 550px);
+            margin-inline: auto;
+            box-sizing: border-box;
         }
 
         .cta-title {
@@ -757,43 +793,94 @@
         ============================================= */
         @media (max-width: 768px) {
             /* Navbar */
-            .navbar { padding: 1rem 1.5rem; }
+            .navbar {
+                padding: 1rem 1rem;
+                padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+                padding-left: calc(1rem + env(safe-area-inset-left, 0px));
+                padding-right: calc(1rem + env(safe-area-inset-right, 0px));
+            }
+            .nav-logo { font-size: 1rem; letter-spacing: -0.02em; }
+            .navbar .btn-primary.nav-cta {
+                padding: 0.5rem 0.85rem;
+                font-size: 0.65rem;
+                letter-spacing: 0.03em;
+            }
             .nav-links { display: none; }
             
             /* Hero Section */
+            .hero-sticky {
+                align-items: flex-end;
+                justify-content: center;
+                padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+            }
             .hero-video { object-position: 65% center; }
-            .hero-title { font-size: 3rem; }
-            .hero-subtitle { font-size: 1rem; }
-            .hero-content { padding: 0 1.5rem; max-width: 100%; bottom: 8vh; }
-            .hero-actions { flex-direction: column; align-items: flex-start; gap: 1rem; }
-            .hero-actions .btn-primary { padding: 0.8rem 2rem; font-size: 0.95rem; }
+            .hero-title {
+                font-size: clamp(2rem, 10vw, 2.75rem);
+                max-width: 100%;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+            .hero-subtitle { font-size: clamp(0.95rem, 3.8vw, 1.05rem); max-width: 100%; }
+            .hero-content {
+                padding: 0 1.25rem;
+                padding-top: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem));
+                max-width: 100%;
+                width: 100%;
+            }
+            .hero-actions { flex-direction: column; align-items: stretch; gap: 1rem; width: 100%; }
+            .hero-actions .btn-primary { padding: 0.8rem 1.5rem; font-size: 0.95rem; width: 100%; max-width: 100%; }
+            .hero-actions .btn-secondary { align-self: flex-start; }
             .video-overlay {
-                background: linear-gradient(90deg, rgba(28,28,28,0.95) 0%, rgba(28,28,28,0.6) 60%, transparent 100%);
+                background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(28,28,28,0.88) 45%, rgba(10,10,10,0.92) 100%);
             }
 
             /* Section 2: Features */
-            .feature-section { padding: 4rem 1.5rem; }
+            .feature-section {
+                padding: 4rem 1.25rem;
+                padding-bottom: max(4rem, env(safe-area-inset-bottom, 0px));
+            }
             .feature-header { margin-bottom: 3rem; }
             .feature-title { font-size: 2.5rem; }
             .feature-desc { font-size: 1rem; }
             .feature-grid { grid-template-columns: 1fr; gap: 3rem; }
             .feature-item { padding: 1.5rem 1rem; }
             .marquee-item { font-size: 0.6rem; padding: 0 1rem; }
-            .ghost-bg-text { font-size: 5rem; top: 30%; }
+            .ghost-bg-text {
+                font-size: clamp(3.5rem, 18vw, 5rem);
+                max-width: 100%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                white-space: normal;
+                text-align: center;
+                line-height: 0.9;
+                padding: 0 0.5rem;
+            }
             .feature-image-wrapper { margin-top: 1rem; }
+            .feature-section { overflow-x: clip; }
 
             /* Section 3: Gallery (Horiz Scroll) */
-            .gallery-title { font-size: 2.5rem; margin-bottom: 1rem; }
-            .gallery-desc { font-size: 1rem; }
-            .gallery-content { padding: 0 1.5rem; }
+            .gallery-title { font-size: clamp(1.75rem, 7vw, 2.5rem); margin-bottom: 1rem; }
+            .gallery-desc { font-size: clamp(0.95rem, 3.5vw, 1.05rem); }
+            .gallery-content { padding: 0 1.25rem; max-width: 100%; }
 
             /* Section 4: CTA */
-            .cta-section { align-items: flex-end; padding-bottom: 3rem; }
+            .cta-section {
+                align-items: center;
+                justify-content: center;
+                padding: 1.25rem;
+                padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+            }
+            .glow-box-wrapper { width: 100%; max-width: 100%; padding: 0 0.25rem; }
             .cta-video-bg { object-position: 65% center; }
-            .beam-box-inner { padding: 1.5rem; }
-            .cta-title { font-size: 1.8rem; }
+            .beam-box-inner { padding: 1.5rem 1.25rem; max-width: 100%; width: 100%; }
+            .cta-title { font-size: clamp(1.45rem, 6vw, 1.85rem); }
             .cta-text { font-size: 0.95rem; margin-bottom: 1.5rem; }
-            .cta-section .btn-primary { padding: 1rem 1.5rem; width: 100%; }
+            .cta-section .btn-primary { padding: 1rem 1.25rem; width: 100%; max-width: 100%; box-sizing: border-box; }
+        }
+
+        @media (max-width: 380px) {
+            .nav-logo { font-size: 0.9rem; }
+            .navbar .btn-primary.nav-cta { padding: 0.45rem 0.65rem; font-size: 0.6rem; }
         }
     </style>
 </head>
@@ -813,7 +900,7 @@
             <a href="#" class="cursor-hover">Design</a>
             <a href="#" class="cursor-hover">Especificações</a>
         </nav>
-        <button class="btn-primary cursor-hover" style="padding: 0.6rem 1.5rem; font-size: 0.75rem;">
+        <button type="button" class="btn-primary nav-cta cursor-hover" style="padding: 0.6rem 1.5rem; font-size: 0.75rem;">
             Comprar Agora
             <div class="shimmer"></div>
         </button>
@@ -1052,26 +1139,48 @@
                 });
             }
 
-            // 2. Lenis Smooth Scroll Setup
-            const lenis = new Lenis({
-                duration: 1.2,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                smooth: true,
-            });
+            // 2. Lenis Smooth Scroll (desktop); mobile usa scroll nativo (melhor com pin/horizontal + iOS)
+            const mqMobile = window.matchMedia("(max-width: 768px)");
+            const isLenisOff = () => mqMobile.matches;
 
-            lenis.on('scroll', (e) => {
-                ScrollTrigger.update();
+            const updateNavFromScroll = (scrollY) => {
                 const nav = document.getElementById('navbar');
                 if (nav) {
-                    if (e.scroll > 50) {
-                        nav.classList.add('scrolled');
-                    } else {
-                        nav.classList.remove('scrolled');
-                    }
+                    if (scrollY > 50) nav.classList.add('scrolled');
+                    else nav.classList.remove('scrolled');
                 }
-            });
-            gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+            };
+
+            let lenis = null;
+            if (!isLenisOff()) {
+                lenis = new Lenis({
+                    duration: 1.2,
+                    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                    smooth: true,
+                });
+                lenis.on('scroll', (e) => {
+                    ScrollTrigger.update();
+                    updateNavFromScroll(e.scroll);
+                });
+                gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+            } else {
+                const onNativeScroll = () => {
+                    ScrollTrigger.update();
+                    updateNavFromScroll(window.scrollY || window.pageYOffset);
+                };
+                window.addEventListener('scroll', onNativeScroll, { passive: true });
+                onNativeScroll();
+            }
             gsap.ticker.lagSmoothing(0);
+
+            let resizeT;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeT);
+                resizeT = setTimeout(() => ScrollTrigger.refresh(), 200);
+            });
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => ScrollTrigger.refresh(), 350);
+            });
 
             // 3. Aparição Suave da Navbar
             setTimeout(() => {
@@ -1168,6 +1277,14 @@
             let videoDuration = 0;
 
             const initVideoScrub = () => {
+                // No mobile, desativamos o Scrub pesado na CPU e deixamos o playback natural fluido
+                if (window.innerWidth <= 768) {
+                    video.loop = true;
+                    video.autoplay = true;
+                    video.play().catch(e => console.log('Autoplay prevent:', e));
+                    return; // Aborta o requestAnimationFrame de seeking para economizar bateria e CPU
+                }
+
                 videoDuration = video.duration || 5; 
                 
                 ScrollTrigger.create({
