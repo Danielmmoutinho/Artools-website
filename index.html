@@ -818,22 +818,18 @@
             }
             .nav-links { display: none; }
             
-            /* Hero Section — scroll longo + sticky (sem pin GSAP no mobile) */
+            /* Hero — no celular não há scrub/parallax de vídeo: o trilho 400vh + sticky só criava “vazio” com fundo #000 atrás. Uma tela cheia e fluxo normal. */
             .hero-track {
-                height: 400vh;
-                /* O trilho é 400vh mas só há ~100vh de conteúdo; o resto era #000 e virava faixa preta na dobra. Gradiente termina no branco da seção 2. */
-                background: linear-gradient(
-                    180deg,
-                    #000000 0%,
-                    #000000 24%,
-                    #141414 42%,
-                    #ecece6 82%,
-                    #ffffff 100%
-                );
+                height: auto;
+                min-height: 0;
+                background: #000000;
             }
             .hero-sticky {
-                position: sticky;
-                top: 0;
+                position: relative;
+                top: auto;
+                min-height: 100vh;
+                min-height: 100dvh;
+                height: auto;
                 align-items: flex-end;
                 justify-content: center;
             }
